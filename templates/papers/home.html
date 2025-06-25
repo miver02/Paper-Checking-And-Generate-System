@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}首页 - 论文生成和查重系统{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-graduation-cap text-primary"></i>
+                论文生成和查重系统
+            </h1>
+            <p class="lead mb-5">利用AI技术帮助您快速生成高质量论文并进行查重检测</p>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">论文生成</h5>
+                    <p class="card-text">使用AI模型根据您的要求生成学术论文</p>
+                    <a href="{% url 'generate_paper' %}" class="btn btn-primary">开始生成</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-search fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">查重检测</h5>
+                    <p class="card-text">检测论文的原创性和相似度</p>
+                    <a href="{% url 'check_plagiarism' %}" class="btn btn-success">开始检测</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tachometer-alt fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">个人中心</h5>
+                    <p class="card-text">查看您的论文和检测历史</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-info">进入中心</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">开始使用</h5>
+                    <p class="card-text">请先登录或注册账户以使用论文生成和查重功能</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary me-2">登录</a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary">注册</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 功能介绍 -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">系统特色</h2>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <i class="fas fa-robot fa-2x text-primary mb-3"></i>
+                <h5>AI智能生成</h5>
+                <p class="text-muted">基于先进的AI模型，生成高质量学术论文</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
+                <h5>专业查重</h5>
+                <p class="text-muted">采用专业查重API，确保论文原创性</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+                <h5>快速高效</h5>
+                <p class="text-muted">异步处理，快速生成和检测结果</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="text-center">
+                <i class="fas fa-user-shield fa-2x text-info mb-3"></i>
+                <h5>安全可靠</h5>
+                <p class="text-muted">用户数据安全保护，隐私有保障</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

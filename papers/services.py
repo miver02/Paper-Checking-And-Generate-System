@@ -70,14 +70,12 @@ class PaperGenerationService:
         topic_info = f"主题: {paper.topic.name}" if paper.topic else ""
         
         prompt = f"""请根据以下要求生成一篇学术论文：
-
-{topic_info}
-论文标题: {paper.title}
-
-具体要求:
-{paper.requirements}
-
-请生成一篇结构完整的学术论文。"""
+            {topic_info}
+            论文标题: {paper.title}
+            具体要求:
+            {paper.requirements}
+            请生成一篇结构完整的学术论文。
+        """
         
         return prompt
 

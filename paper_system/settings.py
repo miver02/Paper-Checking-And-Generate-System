@@ -34,18 +34,18 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # 处理跨域资源共享
+    'django.middleware.security.SecurityMiddleware', # 提供各种安全保护
+    'django.contrib.sessions.middleware.SessionMiddleware', # 管理会话
+    'django.middleware.common.CommonMiddleware', # 提供常用的http处理功能
+    'django.middleware.csrf.CsrfViewMiddleware', # 防止跨站请求伪造攻击
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # 处理用户认证
+    'django.contrib.messages.middleware.MessageMiddleware', # 处理一次性消息
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # 防止点击劫持攻击
 ]
 
 ROOT_URLCONF = 'paper_system.urls'
-
+ 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -65,12 +65,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'paper_system.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.getenv('DB_ENGINE') == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'paper_system'),
+            'USER': os.getenv('DB_USER', 'root'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': """
+                    SET sql_mode='STRICT_TRANS_TABLES';
+                    SET innodb_strict_mode=1;
+                    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+                """,
+                'use_unicode': True,
+                'charset': 'utf8mb4',
+                'autocommit': True,
+            },
+            'CONN_MAX_AGE': 60,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3'
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -108,14 +131,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    'DEFAULT_PERMISSION_CLASSES': [ 
+        'rest_framework.permissions.IsAuthenticated', # 设置访问权限:未登录用户无法访问
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+    'DEFAULT_AUTHENTICATION_CLASSES': [ 
+        'rest_framework.authentication.SessionAuthentication', # 定义如何验证身份:通过cookies中的sessionid识别用户
+        'rest_framework.authentication.TokenAuthentication',  # 支持多种认证
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # 自动为api响应分页
+    'PAGE_SIZE': 20, # 每页显示20条数据
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    }
 }
 
 # CORS settings

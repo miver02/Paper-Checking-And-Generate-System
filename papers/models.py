@@ -9,6 +9,7 @@ class PaperTopic(models.Model):
     description = models.TextField(blank=True, verbose_name='主题描述')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     
+    # Meta 类用于定义模型的元数据和行为配置
     class Meta:
         verbose_name = '论文主题'
         verbose_name_plural = '论文主题'

@@ -8,8 +8,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('papers.urls')),
-    path('', include('papers.urls')),  # 主页面路由
+    path('api/', include('app.papers.urls')),
+    path('', include('app.papers.urls')),  # 主页面路由
+
+    # Vue前端路由（必须放在最后）
+    # re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]
 
 # 开发环境下提供静态文件和媒体文件服务

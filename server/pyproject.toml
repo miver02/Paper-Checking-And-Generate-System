@@ -1,0 +1,20 @@
+[project]
+name = "pgcs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4==4.12.2",
+    "celery==5.3.4",
+    "django==4.2.7",
+    "django-cors-headers==4.3.1",
+    "django-filter>=25.1",
+    "djangorestframework==3.14.0",
+    "jieba==0.42.1",
+    "openai==1.3.0",
+    "pillow==10.1.0",
+    "python-dotenv==1.0.0",
+    "redis==5.0.1",
+    "requests==2.31.0",
+]

@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'papers',  # 我们的主应用
+    'rest_framework.authtoken',
+    'app.papers',  # 我们的主应用
 ]
 
 MIDDLEWARE = [
@@ -119,8 +120,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 添加Vue构建文件的路径
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+    # BASE_DIR / 'web/dist',  # 如果Vue项目在web目录下
+]
 
 # Media files
 MEDIA_URL = '/media/'
@@ -135,8 +142,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', # 设置访问权限:未登录用户无法访问
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [ 
-        'rest_framework.authentication.SessionAuthentication', # 定义如何验证身份:通过cookies中的sessionid识别用户
-        'rest_framework.authentication.TokenAuthentication',  # 支持多种认证
+        'rest_framework.authentication.TokenAuthentication',  # 使用token认证
+        'rest_framework.authentication.SessionAuthentication', # 保留session认证
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # 自动为api响应分页
     'PAGE_SIZE': 20, # 每页显示20条数据
@@ -161,6 +168,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 # AI模型设置

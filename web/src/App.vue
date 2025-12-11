@@ -1,0 +1,24 @@
+<!-- src/App.vue -->
+<template>
+  <router-view />
+</template>
+
+<script setup>
+// App.vue 现在只负责路由视图渲染
+</script>
+
+<style>
+/* 全局样式保留在这里 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+</style>

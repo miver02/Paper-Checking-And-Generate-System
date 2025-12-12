@@ -47,17 +47,17 @@
             <router-link to="/" class="dropdown-item">个人中心</router-link>
           </el-menu-item>
           <el-menu-item divided>
-            <a href="#" @click.prevent="handleLogout" class="dropdown-item">退出登录</a>
+            <a href="#" @click.prevent="handleLogoutClick" class="dropdown-item">退出登录</a>
           </el-menu-item>
         </el-sub-menu>
       </template>
       
       <template v-else>
-        <el-menu-item index="login">
-          <router-link to="/login" class="nav-link">登录</router-link>
+        <el-menu-item index="login" @click="handleLoginClick">
+           <a href="#" class="nav-link">登录</a>
         </el-menu-item>
-        <el-menu-item index="register">
-          <router-link to="/register" class="nav-link">注册</router-link>
+        <el-menu-item index="register" @click="handleRegisterClick">
+           <a href="#" class="nav-link">注册</a>
         </el-menu-item>
       </template>
     </div>
@@ -65,7 +65,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import {
   Reading,
   Odometer,
@@ -73,6 +72,9 @@ import {
   Search,
   User
 } from '@element-plus/icons-vue'
+
+// 定义emits
+const emit = defineEmits(['login-click', 'register-click', 'logout-click'])
 
 // 状态管理应从Vuex或Pinia获取
 const props = defineProps({
@@ -86,8 +88,19 @@ const props = defineProps({
   }
 })
 
-const handleLogout = () => {
+// 登录
+const handleLoginClick = () => {
+  emit('login-click')
+}
+
+// 注册
+const handleRegisterClick = () => {
+  emit('register-click')
+}
+
+const handleLogoutClick = () => {
   // 实现登出逻辑
+  emit('logout-click')
   console.log('用户登出')
 }
 </script>

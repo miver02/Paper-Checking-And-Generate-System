@@ -1,7 +1,7 @@
 <!-- src/views/Home/HomeFeatures.vue -->
 <template>
   <div class="features-container">
-    <template v-if="isAuthenticated">
+    <template>
       <el-row :gutter="20">
         <el-col :span="8">
           <el-card class="feature-card" shadow="hover">
@@ -35,21 +35,6 @@
         </el-col>
       </el-row>
     </template>
-    
-    <template v-else>
-      <div class="auth-prompt">
-        <el-card class="prompt-card" shadow="never">
-          <div class="card-content text-center">
-            <h3 class="card-title">开始使用</h3>
-            <p class="card-description">请先登录或注册账户以使用论文生成和查重功能</p>
-            <div class="actions">
-              <el-button type="primary" @click="navigate('/login')">登录</el-button>
-              <el-button type="primary" plain @click="navigate('/register')">注册</el-button>
-            </div>
-          </div>
-        </el-card>
-      </div>
-    </template>
   </div>
 </template>
 
@@ -66,6 +51,9 @@ const props = defineProps({
 const emit = defineEmits(['navigate'])
 
 const navigate = (path) => {
+  if (!isAuthenticated) {
+    navigate('/')
+  }
   emit('navigate', path)
 }
 </script>

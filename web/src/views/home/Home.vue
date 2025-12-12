@@ -1,7 +1,6 @@
 <!-- src/views/Home/Home.vue -->
 <template>
-  <h1>欢迎来到论文生成和查重系统</h1>
-  <MainLayout :messages="messages">
+  <MainLayout :messages="messages" @login-click="handleLoginClick">
     <div class="home-container">
       <div class="hero-section">
         <h1 class="hero-title">
@@ -41,7 +40,7 @@ import { useRouter } from 'vue-router'
 import {
   Reading,
   Cpu,
-  ShieldCheck,
+  DocumentChecked,
   Clock,
   UserFilled
 } from '@element-plus/icons-vue'
@@ -62,7 +61,7 @@ const features = ref([
     color: '#409eff'
   },
   {
-    icon: ShieldCheck,
+    icon: DocumentChecked,
     title: '专业查重',
     description: '采用专业查重API，确保论文原创性',
     color: '#67c23a'
@@ -83,6 +82,13 @@ const features = ref([
 
 const handleNavigation = (path) => {
   router.push(path)
+}
+
+// 添加登录点击处理函数
+const handleLoginClick = () => {
+  // 触发 MainLayout 中的登录模态框显示
+  // 可以通过事件总线、状态管理或者 ref 调用来实现
+  console.log('登录按钮被点击')
 }
 </script>
 

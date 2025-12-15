@@ -1,7 +1,7 @@
 <!-- src/views/Home/HomeFeatures.vue -->
 <template>
   <div class="features-container">
-    <template>
+    <template v-if="userStore.isLoginModalVisible">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-card class="feature-card" shadow="hover">
@@ -35,26 +35,38 @@
         </el-col>
       </el-row>
     </template>
+    <template v-else>
+      <el-card class="prompt-card auth-prompt" shadow="never">
+        <div class="text-center">
+          <h3 style="margin-bottom: 20px;">请登录以使用全部功能</h3>
+          <div class="actions">
+            <el-button type="primary" @click="showLogin">登录</el-button>
+            <el-button type="success" @click="showRegister">注册</el-button>
+          </div>
+        </div>
+      </el-card>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { EditPen, Search, Odometer } from '@element-plus/icons-vue'
+import { useUserStore } from '@/store/modules/user'
 
-const props = defineProps({
-  isAuthenticated: {
-    type: Boolean,
-    default: false
-  }
-})
+const userStore = useUserStore()
 
-const emit = defineEmits(['navigate'])
+const emit = defineEmits(['navigate', 'show-login', 'show-register'])
 
 const navigate = (path) => {
-  if (!isAuthenticated) {
-    navigate('/')
-  }
   emit('navigate', path)
+}
+
+const showLogin = () => {
+  emit('show-login')
+}
+
+const showRegister = () => {
+  emit('show-register')
 }
 </script>
 

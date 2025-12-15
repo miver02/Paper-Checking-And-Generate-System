@@ -1,6 +1,6 @@
 <!-- src/views/Home/Home.vue -->
 <template>
-  <MainLayout :messages="messages" @login-click="handleLoginClick">
+  <MainLayout :messages="messages">
     <div class="home-container">
       <div class="hero-section">
         <h1 class="hero-title">
@@ -11,7 +11,6 @@
       </div>
       
       <HomeFeatures 
-        :is-authenticated="isAuthenticated" 
         @navigate="handleNavigation"
       />
       
@@ -48,9 +47,6 @@ import MainLayout from '@/components/layout/MainLayout.vue'
 import HomeFeatures from './HomeFeatures.vue'
 
 const router = useRouter()
-
-// 状态管理应从Vuex或Pinia获取
-const isAuthenticated = ref(false)
 const messages = ref([])
 
 const features = ref([
@@ -84,12 +80,6 @@ const handleNavigation = (path) => {
   router.push(path)
 }
 
-// 添加登录点击处理函数
-const handleLoginClick = () => {
-  // 触发 MainLayout 中的登录模态框显示
-  // 可以通过事件总线、状态管理或者 ref 调用来实现
-  console.log('登录按钮被点击')
-}
 </script>
 
 <style scoped>

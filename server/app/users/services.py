@@ -5,7 +5,7 @@ import logging
 from typing import Dict, Any, Optional
 from django.conf import settings
 from django.utils import timezone
-from .models import GeneratedPaper, PlagiarismCheck, UserProfile
+from .models.generate_paper import GeneratedPaper, PlagiarismCheck, UserProfile
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-这是一个基于Django框架开发的论文生成和查重系统，集成了AI模型生成功能和第三方查重API。本文档将详细介绍项目的实现步骤和每个文件的作用。
+这是一个基于 Django 框架开发的论文生成和查重系统，集成了 AI 模型生成功能和第三方查重 API。本文档将详细介绍项目的实现步骤和每个文件的作用。
 
 ## 系统架构
 
@@ -21,18 +21,21 @@
 
 ### 第一步：项目基础配置文件
 
-#### 1. `paper_system/settings.py` - 项目核心配置
-**作用**: Django项目的所有配置中心
+#### 1. `paper/settings.py` - 项目核心配置
+
+**作用**: Django 项目的所有配置中心
 **关键配置内容**:
-- **数据库连接设置**: 配置SQLite或其他数据库
+
+- **数据库连接设置**: 配置 SQLite 或其他数据库
 - **应用注册**: 在`INSTALLED_APPS`中注册所有应用
 - **中间件配置**: CORS、认证、会话等中间件
 - **静态文件和媒体文件路径**: 文件上传和静态资源配置
-- **API密钥配置**: OpenAI API密钥等敏感信息
-- **Celery异步任务配置**: Redis连接和任务配置
+- **API 密钥配置**: OpenAI API 密钥等敏感信息
+- **Celery 异步任务配置**: Redis 连接和任务配置
 - **国际化设置**: 语言和时区配置
 
 **实现重点**:
+
 ```python
 # 关键配置示例
 INSTALLED_APPS = [
@@ -48,51 +51,61 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ```
 
 #### 2. `.env.example` - 环境变量模板
+
 **作用**: 定义项目需要的环境变量模板
 **包含内容**:
-- Django密钥和调试模式
-- 数据库连接URL
-- OpenAI API密钥
-- 查重API配置
-- Redis连接配置
+
+- Django 密钥和调试模式
+- 数据库连接 URL
+- OpenAI API 密钥
+- 查重 API 配置
+- Redis 连接配置
 
 **安全要点**: 实际的`.env`文件不应提交到版本控制
 
 #### 3. `requirements.txt` - 依赖包列表
-**作用**: 定义项目需要的Python包及其版本
+
+**作用**: 定义项目需要的 Python 包及其版本
 **核心依赖**:
-- Django框架和REST Framework
-- OpenAI客户端库
-- Celery异步任务队列
-- Redis客户端
+
+- Django 框架和 REST Framework
+- OpenAI 客户端库
+- Celery 异步任务队列
+- Redis 客户端
 - 其他工具库
 
 ### 第二步：数据模型设计
 
 #### 4. `papers/models.py` - 数据库模型
+
 **作用**: 定义数据库表结构和数据关系
 **核心模型设计**:
 
 ##### `PaperTopic` - 论文主题分类
+
 - 管理论文主题类别
 - 提供主题选择功能
 
 ##### `GeneratedPaper` - 生成的论文记录
+
 - 存储论文生成请求和结果
 - 跟踪生成状态和参数
 - 自动计算字数和完成时间
 
 ##### `PlagiarismCheck` - 查重检测记录
+
 - 存储查重请求和结果
 - 记录相似度百分比
 - 保存详细检测报告
 
 ##### `UserProfile` - 用户配置信息
+
 - 扩展用户信息
 - 统计使用情况
 - 保存用户偏好设置
 
 **实现重点**:
+
 - 合理的字段类型选择
 - 状态字段管理（如生成中、已完成、失败）
 - 时间戳自动更新
@@ -102,88 +115,107 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ### 第三步：业务逻辑层
 
 #### 5. `papers/services.py` - 核心业务服务
-**作用**: 封装主要业务逻辑，与外部API交互
+
+**作用**: 封装主要业务逻辑，与外部 API 交互
 
 ##### `PaperGenerationService` - 论文生成服务
+
 **功能**:
-- 构建AI提示词
-- 调用OpenAI API
+
+- 构建 AI 提示词
+- 调用 OpenAI API
 - 处理生成结果
 - 更新数据库状态
 
 **核心方法**:
+
 - `generate_paper()`: 主要生成逻辑
 - `_build_prompt()`: 构建提示词
 
 ##### `PlagiarismCheckService` - 查重检测服务
+
 **功能**:
-- 调用查重API
+
+- 调用查重 API
 - 解析检测结果
 - 更新检测状态
 
 **实现重点**:
+
 - 完善的错误处理机制
-- API调用的重试逻辑
+- API 调用的重试逻辑
 - 结果数据的标准化处理
 - 日志记录
 
 #### 6. `papers/tasks.py` - 异步任务
-**作用**: 定义Celery后台任务，处理耗时操作
+
+**作用**: 定义 Celery 后台任务，处理耗时操作
 
 **核心任务**:
+
 - `generate_paper_task`: 异步执行论文生成
 - `check_plagiarism_task`: 异步执行查重检测
 
 **设计原则**:
+
 - 任务应该是幂等的（可重复执行）
 - 包含完善的错误处理
 - 提供任务状态反馈
 
-### 第四步：API接口层
+### 第四步：API 接口层
 
 #### 7. `papers/serializers.py` - 数据序列化
-**作用**: 定义API数据格式转换和验证
+
+**作用**: 定义 API 数据格式转换和验证
 
 **序列化器类型**:
-- **模型序列化器**: 用于标准CRUD操作
+
+- **模型序列化器**: 用于标准 CRUD 操作
 - **创建专用序列化器**: 用于复杂的创建逻辑
 - **嵌套序列化器**: 处理关联数据
 
 **核心序列化器**:
+
 - `GeneratedPaperSerializer`: 论文数据序列化
 - `PlagiarismCheckSerializer`: 查重数据序列化
 - `CreatePaperSerializer`: 论文创建请求
 - `CreatePlagiarismCheckSerializer`: 查重创建请求
 
 **实现重点**:
+
 - 字段验证规则
 - 只读和只写字段区分
 - 自定义验证方法
 
 #### 8. `papers/views.py` - 视图控制器
-**作用**: 处理HTTP请求和响应，连接前端和后端
+
+**作用**: 处理 HTTP 请求和响应，连接前端和后端
 
 **视图类型分类**:
 
-##### Web视图 - 渲染HTML页面
+##### Web 视图 - 渲染 HTML 页面
+
 - `home()`: 系统首页
 - `dashboard()`: 用户仪表板
 - `generate_paper_page()`: 论文生成页面
 - `check_plagiarism_page()`: 查重检测页面
 - `register()`: 用户注册
 
-##### API视图 - 提供REST接口
-- `GeneratedPaperViewSet`: 论文管理API
-- `PlagiarismCheckViewSet`: 查重管理API
-- `UserProfileViewSet`: 用户配置API
+##### API 视图 - 提供 REST 接口
 
-**核心API端点**:
+- `GeneratedPaperViewSet`: 论文管理 API
+- `PlagiarismCheckViewSet`: 查重管理 API
+- `UserProfileViewSet`: 用户配置 API
+
+**核心 API 端点**:
+
 - `POST /api/papers/create_and_generate/`: 创建并生成论文
 - `GET /api/papers/{id}/status/`: 查询生成状态
 - `POST /api/plagiarism/create_and_check/`: 创建并开始查重
 - `GET /api/plagiarism/{id}/status/`: 查询检测状态
 
 **实现重点**:
+
 - 权限控制（用户只能访问自己的数据）
 - 参数验证
 - 异步任务启动
@@ -192,37 +224,45 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ### 第五步：路由配置
 
 #### 9. `papers/urls.py` - 应用路由
-**作用**: 定义URL路径到视图的映射
+
+**作用**: 定义 URL 路径到视图的映射
 
 **路由分类**:
-- **Web页面路由**: 用户界面访问
-- **API路由**: REST API接口
+
+- **Web 页面路由**: 用户界面访问
+- **API 路由**: REST API 接口
 - **认证路由**: 登录、注册、登出
 
 **路由设计原则**:
-- RESTful API设计规范
-- 清晰的URL命名
+
+- RESTful API 设计规范
+- 清晰的 URL 命名
 - 合理的路由分组
 
-#### 10. `paper_system/urls.py` - 主路由
+#### 10. `paper/urls.py` - 主路由
+
 **作用**: 项目总路由配置，包含所有应用的路由
-**功能**: 
+**功能**:
+
 - 引入应用路由
 - 配置静态文件服务
 - 设置管理后台路由
 
 ### 第六步：管理后台
 
-#### 11. `papers/admin.py` - Django管理后台
-**作用**: 配置Django自带的管理后台界面
+#### 11. `papers/admin.py` - Django 管理后台
+
+**作用**: 配置 Django 自带的管理后台界面
 
 **管理功能**:
+
 - 数据查看和编辑
 - 批量操作
 - 搜索和过滤
 - 自定义字段显示
 
 **配置要点**:
+
 - 列表显示字段
 - 搜索字段配置
 - 过滤器设置
@@ -232,138 +272,166 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ### 第七步：前端模板
 
 #### 12. `templates/base.html` - 基础模板
+
 **作用**: 定义页面公共结构和样式
 
 **包含内容**:
-- HTML文档结构
-- Bootstrap CSS框架
+
+- HTML 文档结构
+- Bootstrap CSS 框架
 - 导航栏组件
 - 用户认证状态显示
-- JavaScript库引入
+- JavaScript 库引入
 - 消息提示系统
 
 **设计特点**:
+
 - 响应式设计
-- 现代化UI风格
+- 现代化 UI 风格
 - 良好的用户体验
 
 #### 13. `templates/papers/` 目录 - 功能页面模板
+
 **主要页面及作用**:
 
 ##### `home.html` - 系统首页
+
 - 系统介绍和功能展示
 - 用户引导
 - 快速入口
 
 ##### `dashboard.html` - 用户仪表板
+
 - 用户统计信息
 - 最近的论文和查重记录
 - 快速操作入口
 
 ##### `generate_paper.html` - 论文生成页面
+
 - 论文生成表单
 - 参数配置界面
 - 实时状态显示
 
 ##### `check_plagiarism.html` - 查重检测页面
+
 - 查重提交表单
 - 检测进度显示
 - 结果展示
 
 ##### `paper_detail.html` - 论文详情页面
+
 - 论文内容展示
 - 生成参数显示
 - 操作按钮
 
 ##### `plagiarism_detail.html` - 查重详情页面
+
 - 查重结果展示
 - 相似度分析
 - 详细报告
 
 **前端技术栈**:
-- Bootstrap 5: 响应式UI框架
-- jQuery: JavaScript操作
+
+- Bootstrap 5: 响应式 UI 框架
+- jQuery: JavaScript 操作
 - Font Awesome: 图标库
 - AJAX: 异步数据交互
 
 ### 第八步：应用配置
 
 #### 14. `papers/apps.py` - 应用配置
-**作用**: Django应用的元数据配置
+
+**作用**: Django 应用的元数据配置
 **内容**:
+
 - 应用名称
 - 默认主键字段类型
 - 应用显示名称
 
-#### 15. `celery_app.py` - Celery配置
+#### 15. `celery_app.py` - Celery 配置
+
 **作用**: 异步任务队列的配置文件
 **功能**:
-- Celery应用初始化
+
+- Celery 应用初始化
 - 任务发现配置
-- 与Django设置集成
+- 与 Django 设置集成
 
 ## 推荐的开发顺序
 
-### 阶段1: 基础搭建 (1-2天)
+### 阶段 1: 基础搭建 (1-2 天)
+
 1. **环境配置**
+
    - 配置 `settings.py` 基础设置
    - 创建 `.env` 环境变量文件
    - 安装依赖包
 
 2. **数据模型设计**
+
    - 设计 `models.py` 中的数据模型
    - 创建和执行数据库迁移
    - 测试模型关系
 
 3. **基础验证**
-   - 运行Django开发服务器
+   - 运行 Django 开发服务器
    - 访问管理后台
    - 创建超级用户
 
-### 阶段2: 核心功能开发 (3-5天)
+### 阶段 2: 核心功能开发 (3-5 天)
+
 1. **业务逻辑实现**
+
    - 实现 `services.py` 中的业务服务
-   - 配置OpenAI API调用
+   - 配置 OpenAI API 调用
    - 实现模拟查重功能
 
 2. **异步任务配置**
+
    - 设置 `tasks.py` 异步任务
-   - 配置Redis和Celery
+   - 配置 Redis 和 Celery
    - 测试任务执行
 
-3. **API接口开发**
+3. **API 接口开发**
+
    - 创建 `serializers.py` 序列化器
-   - 实现 `views.py` 中的API视图
+   - 实现 `views.py` 中的 API 视图
    - 配置 `urls.py` 路由
 
 4. **功能测试**
-   - 测试论文生成API
-   - 测试查重检测API
+   - 测试论文生成 API
+   - 测试查重检测 API
    - 验证异步任务执行
 
-### 阶段3: 用户界面开发 (2-3天)
+### 阶段 3: 用户界面开发 (2-3 天)
+
 1. **基础模板**
+
    - 创建 `base.html` 基础模板
    - 设置导航和样式
    - 配置静态文件
 
 2. **功能页面**
+
    - 实现各功能页面模板
    - 添加表单和交互
-   - 集成AJAX调用
+   - 集成 AJAX 调用
 
 3. **用户认证**
    - 实现登录注册页面
    - 配置用户权限
    - 测试认证流程
 
-### 阶段4: 完善和优化 (1-2天)
+### 阶段 4: 完善和优化 (1-2 天)
+
 1. **管理后台**
+
    - 配置 `admin.py` 管理界面
    - 添加数据管理功能
    - 测试后台操作
 
 2. **错误处理**
+
    - 完善异常处理机制
    - 添加日志记录
    - 优化用户提示
@@ -376,44 +444,51 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ## 关键实现要点
 
 ### 1. 数据模型设计原则
+
 - **状态管理**: 使用枚举字段管理业务状态
 - **时间戳**: 自动记录创建和更新时间
 - **关系设计**: 合理使用外键和关联关系
 - **数据完整性**: 添加必要的约束和验证
 
 ### 2. 异步处理最佳实践
+
 - **任务幂等性**: 任务可以安全地重复执行
 - **错误处理**: 完善的异常捕获和处理
 - **状态反馈**: 提供任务执行状态查询
 - **资源管理**: 合理控制并发任务数量
 
-### 3. API设计规范
-- **RESTful设计**: 遵循REST API设计原则
+### 3. API 设计规范
+
+- **RESTful 设计**: 遵循 REST API 设计原则
 - **数据验证**: 严格的输入参数验证
 - **权限控制**: 确保数据访问安全
 - **错误响应**: 统一的错误响应格式
 
 ### 4. 前端交互优化
+
 - **响应式设计**: 支持各种设备屏幕
 - **用户体验**: 提供加载状态和进度提示
 - **错误处理**: 友好的错误信息显示
-- **实时更新**: 使用AJAX实现无刷新交互
+- **实时更新**: 使用 AJAX 实现无刷新交互
 
 ### 5. 安全考虑
-- **API密钥保护**: 使用环境变量存储敏感信息
+
+- **API 密钥保护**: 使用环境变量存储敏感信息
 - **用户认证**: 确保只有授权用户可以访问
 - **数据隔离**: 用户只能访问自己的数据
-- **输入验证**: 防止SQL注入和XSS攻击
+- **输入验证**: 防止 SQL 注入和 XSS 攻击
 
 ## 扩展功能建议
 
 ### 短期扩展
+
 - 论文模板功能
 - 批量生成和检测
 - 导出功能（PDF、Word）
-- 更多AI模型支持
+- 更多 AI 模型支持
 
 ### 长期扩展
+
 - 用户协作功能
 - 论文版本管理
 - 高级分析报告
@@ -422,33 +497,38 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 ## 部署和运维
 
 ### 开发环境
-- SQLite数据库
-- Django开发服务器
-- 本地Redis服务
+
+- SQLite 数据库
+- Django 开发服务器
+- 本地 Redis 服务
 
 ### 生产环境
-- PostgreSQL/MySQL数据库
+
+- PostgreSQL/MySQL 数据库
 - Nginx + Gunicorn
-- Docker容器化部署
+- Docker 容器化部署
 - 监控和日志系统
 
 ## 学习资源推荐
 
-### Django相关
-- Django官方文档
-- Django REST Framework文档
-- Celery官方文档
+### Django 相关
+
+- Django 官方文档
+- Django REST Framework 文档
+- Celery 官方文档
 
 ### 前端技术
-- Bootstrap官方文档
-- jQuery API文档
+
+- Bootstrap 官方文档
+- jQuery API 文档
 - JavaScript ES6+语法
 
 ### 部署运维
-- Docker官方教程
-- Nginx配置指南
-- Redis使用指南
+
+- Docker 官方教程
+- Nginx 配置指南
+- Redis 使用指南
 
 ---
 
-**注意**: 本系统仅用于学术研究和教育目的，请遵守相关法律法规和学术道德规范。在使用AI生成内容时，请注意原创性和学术诚信。 
+**注意**: 本系统仅用于学术研究和教育目的，请遵守相关法律法规和学术道德规范。在使用 AI 生成内容时，请注意原创性和学术诚信。

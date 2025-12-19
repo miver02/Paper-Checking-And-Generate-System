@@ -15,7 +15,7 @@
       </el-menu-item>
     </div>
     
-    <div class="navbar-center" v-if="isAuthenticated">
+    <div class="navbar-center">
       <el-menu-item index="1">
         <router-link to="/" class="nav-link">
           <el-icon><Odometer /></el-icon>
@@ -72,21 +72,13 @@ import {
   Search,
   User
 } from '@element-plus/icons-vue'
+import { useUserStore } from '@/store/modules/user.js'
+
 
 // 定义emits
 const emit = defineEmits(['login-click', 'register-click', 'logout-click'])
+const userStore = useUserStore()
 
-// 状态管理应从Vuex或Pinia获取
-const props = defineProps({
-  isAuthenticated: {
-    type: Boolean,
-    default: false
-  },
-  username: {
-    type: String,
-    default: ''
-  }
-})
 
 // 登录
 const handleLoginClick = () => {

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PaperTopic, GeneratedPaper, PlagiarismCheck, UserProfile
+from .models.generate_paper import PaperTopic, GeneratedPaper, PlagiarismCheck, UserProfile
 
 
 @admin.register(PaperTopic)

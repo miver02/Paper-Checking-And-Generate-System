@@ -1,24 +1,20 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .models import PaperTopic, GeneratedPaper, PlagiarismCheck, UserProfile
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models.generate_paper import GeneratedPaper
+from .models.check_paper import PlagiarismCheck
 from .serializers import (
     PaperTopicSerializer, GeneratedPaperSerializer, PlagiarismCheckSerializer,
     UserProfileSerializer, CreatePaperSerializer, CreatePlagiarismCheckSerializer
 )
 from .tasks import generate_paper_task, check_plagiarism_task
-import json
-
 
 # Web页面视图
 def home(request):
@@ -218,3 +214,28 @@ def user_stats(request):
         'recent_papers': GeneratedPaperSerializer(recent_papers, many=True).data,
         'recent_checks': PlagiarismCheckSerializer(recent_checks, many=True).data
     }) 
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def vue_login(request):
+    """Vue前端登录API"""
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if username and password:
+        user = IsAuthenticated(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                }
+            })
+        else:
+            return Response({'error': '用户名或密码错误'}, status=400)
+    else:
+        return Response({'error': '请提供用户名和密码'}, status=400)

@@ -1,6 +1,8 @@
 <!-- src/views/Home/Home.vue -->
 <template>
-  <MainLayout :messages="messages">
+  <MainLayout 
+    :messages="messages"
+  >
     <div class="home-container">
       <div class="hero-section">
         <h1 class="hero-title">
@@ -36,6 +38,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/store/modules/user.js'
 import {
   Reading,
   Cpu,
@@ -47,6 +50,7 @@ import MainLayout from '@/components/layout/MainLayout.vue'
 import HomeFeatures from './HomeFeatures.vue'
 
 const router = useRouter()
+const userStore = useUserStore()
 const messages = ref([])
 
 const features = ref([

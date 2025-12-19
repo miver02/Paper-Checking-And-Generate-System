@@ -1,72 +1,48 @@
-<!-- src/views/Home/HomeFeatures.vue -->
+<!-- src/views/home/HomeFeatures.vue -->
 <template>
   <div class="features-container">
-    <template v-if="userStore.isLoginModalVisible">
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-card class="feature-card" shadow="hover">
-            <div class="card-content">
-              <el-icon :size="48" color="#409eff" class="card-icon"><EditPen /></el-icon>
-              <h3 class="card-title">论文生成</h3>
-              <p class="card-description">使用AI模型根据您的要求生成学术论文</p>
-              <el-button type="primary" @click="navigate('/generate')">开始生成</el-button>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="8">
-          <el-card class="feature-card" shadow="hover">
-            <div class="card-content">
-              <el-icon :size="48" color="#67c23a" class="card-icon"><Search /></el-icon>
-              <h3 class="card-title">查重检测</h3>
-              <p class="card-description">检测论文的原创性和相似度</p>
-              <el-button type="success" @click="navigate('/check')">开始检测</el-button>
-            </div>
-          </el-card>
-        </el-col>
-        <el-col :span="8">
-          <el-card class="feature-card" shadow="hover">
-            <div class="card-content">
-              <el-icon :size="48" color="#409eff" class="card-icon"><Odometer /></el-icon>
-              <h3 class="card-title">个人中心</h3>
-              <p class="card-description">查看您的论文和检测历史</p>
-              <el-button type="primary" plain @click="navigate('/dashboard')">进入中心</el-button>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-    </template>
-    <template v-else>
-      <el-card class="prompt-card auth-prompt" shadow="never">
-        <div class="text-center">
-          <h3 style="margin-bottom: 20px;">请登录以使用全部功能</h3>
-          <div class="actions">
-            <el-button type="primary" @click="showLogin">登录</el-button>
-            <el-button type="success" @click="showRegister">注册</el-button>
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <el-card class="feature-card" shadow="hover">
+          <div class="card-content">
+            <el-icon :size="48" color="#409eff" class="card-icon"><EditPen /></el-icon>
+            <h3 class="card-title">论文生成</h3>
+            <p class="card-description">使用AI模型根据您的要求生成学术论文</p>
+            <el-button type="primary" @click="navigate('/generate')">开始生成</el-button>
           </div>
-        </div>
-      </el-card>
-    </template>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card class="feature-card" shadow="hover">
+          <div class="card-content">
+            <el-icon :size="48" color="#67c23a" class="card-icon"><Search /></el-icon>
+            <h3 class="card-title">查重检测</h3>
+            <p class="card-description">检测论文的原创性和相似度</p>
+            <el-button type="success" @click="navigate('/check')">开始检测</el-button>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card class="feature-card" shadow="hover">
+          <div class="card-content">
+            <el-icon :size="48" color="#409eff" class="card-icon"><Odometer /></el-icon>
+            <h3 class="card-title">个人中心</h3>
+            <p class="card-description">查看您的论文和检测历史</p>
+            <el-button type="primary" plain @click="navigate('/dashboard')">进入中心</el-button>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup>
 import { EditPen, Search, Odometer } from '@element-plus/icons-vue'
-import { useUserStore } from '@/store/modules/user'
 
-const userStore = useUserStore()
-
-const emit = defineEmits(['navigate', 'show-login', 'show-register'])
+const emit = defineEmits(['navigate'])
 
 const navigate = (path) => {
   emit('navigate', path)
-}
-
-const showLogin = () => {
-  emit('show-login')
-}
-
-const showRegister = () => {
-  emit('show-register')
 }
 </script>
 
@@ -99,27 +75,5 @@ const showRegister = () => {
   margin-bottom: 20px;
   color: #606266;
   line-height: 1.6;
-}
-
-.auth-prompt {
-  display: flex;
-  justify-content: center;
-}
-
-.prompt-card {
-  width: 100%;
-  max-width: 500px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.text-center {
-  text-align: center;
 }
 </style>

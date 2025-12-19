@@ -1,5 +1,6 @@
 // 配置 VS Code 自动格式化
 {
+  // vue保存时格式化配置
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[vue]": {
@@ -8,7 +9,11 @@
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.codeActionsOnSave": [
-    "source.fixAll.eslint"
-  ]
+  "editor.codeActionsOnSave": ["source.fixAll.eslint"],
+
+  "python.formatting.provider": "black", // 或 "autopep8", "yapf"
+  "editor.formatOnType": true,
+  "[python]": {
+    "editor.defaultFormatter": "mikoz.black-py"
+  } // 输入时自动格式化
 }

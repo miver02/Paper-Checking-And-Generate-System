@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import PaperTopic, GeneratedPaper, PlagiarismCheck, UserProfile
+from .models.generate_paper import PaperTopic, GeneratedPaper, PlagiarismCheck, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):

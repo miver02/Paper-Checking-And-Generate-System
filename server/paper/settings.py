@@ -1,5 +1,5 @@
 """
-Django settings for paper_system project.
+Django settings for paper project.
 """
 
 import os
@@ -7,7 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # 加载环境变量
-load_dotenv()
+load_dotenv('./.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
-    'app.papers',  # 我们的主应用
+    'app.manager', 
+    'app.users',  
 ]
 
 MIDDLEWARE = [
@@ -45,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware', # 防止点击劫持攻击
 ]
 
-ROOT_URLCONF = 'paper_system.urls'
+ROOT_URLCONF = 'paper.urls'
  
 TEMPLATES = [
     {
@@ -63,24 +64,21 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'paper_system.wsgi.application'
+WSGI_APPLICATION = 'paper.wsgi.application'
 
 # Database
 if os.getenv('DB_ENGINE') == 'mysql':
+    # mysql 配置
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('DB_NAME', 'paper_system'),
-            'USER': os.getenv('DB_USER', 'root'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '3306'),
+            'NAME': os.getenv('DB_NAME', 'pgcs'),
+            'USER': os.getenv('DB_USER', 'pgcs'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'pgcs'),
+            'HOST': os.getenv('DB_HOST', '0.0.0.0'),
+            'PORT': int(os.getenv('DB_PORT', '0000')),
             'OPTIONS': {
-                'init_command': """
-                    SET sql_mode='STRICT_TRANS_TABLES';
-                    SET innodb_strict_mode=1;
-                    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
-                """,
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES';",
                 'use_unicode': True,
                 'charset': 'utf8mb4',
                 'autocommit': True,
@@ -88,6 +86,19 @@ if os.getenv('DB_ENGINE') == 'mysql':
             'CONN_MAX_AGE': 60,
         }
     }
+    # Redis 配置（缓存/会话）
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': os.getenv('REDIS_URL', 'pgcs'),  # Docker Redis 地址+数据库编号
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'PASSWORD': os.getenv('REDIS_PASSWORD', 'pgcs'),
+            }
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
 else:
     DATABASES = {
         'default': {
@@ -95,6 +106,13 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3'
         }
     }
+    # SQLite模式下使用本地内存缓存
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -126,7 +144,7 @@ STATIC_URL = '/static/'
 # 添加Vue构建文件的路径
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    # BASE_DIR / 'web/dist',  # 如果Vue项目在web目录下
+    BASE_DIR / 'web/dist',  # 如果Vue项目在web目录下
 ]
 
 # Media files
@@ -187,3 +205,6 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE 
+
+# 指定自定义用户模型（关键！）
+AUTH_USER_MODEL = "users.User"

@@ -27,4 +27,5 @@ urlpatterns = [
     # API路由
     path('api/', include(router.urls)),
     path('api/stats/', views.user_stats, name='user_stats'),
+    path('api/vue-login/', views.vue_login, name='vue_login')
 ] 

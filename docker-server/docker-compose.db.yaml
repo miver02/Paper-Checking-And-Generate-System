@@ -1,0 +1,56 @@
+services:
+  # MySQL服务（带数据持久化）
+  mysql8:
+    image: mysql:8.0.29
+    container_name: database-mysql8-1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_INITDB_CHARSET: utf8mb4  # 指定初始化字符集
+      MYSQL_INITDB_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      # 初始化脚本目录（可选，首次启动时执行）
+      - ./config/mysql/:/docker-entrypoint-initdb.d/
+      # MySQL数据持久化卷（核心：将数据目录映射到宿主机或命名卷）
+      - database_mysql_data:/var/lib/mysql  # /var/lib/mysql是MySQL容器内默认数据目录
+    ports:
+      - "3306:3306"
+    deploy:
+      resources:
+        limits:
+          memory: 2G  # 可选：限制MySQL内存
+
+  # Redis服务（带数据持久化）
+  redis:
+    image: redis:latest
+    container_name: database-redis-1
+    restart: always
+     # 关键：官方镜像支持的命令行参数（直接传递给 redis-server）
+    # command: >
+    #   redis-server
+    #   --requirepass redis  # 密码（对应你想要的 REDIS_PASSWORD=redis）
+    #   --appendonly yes     # 启用 AOF（对应 REDIS_AOF_ENABLED=yes）
+    #   --appendfsync everysec  # AOF 同步策略（对应 REDIS_AOF_FSYNC=everysec）
+    # environment:
+    #   - REDIS_PASSWORD=redis  # 替换为你的密码
+    #   - REDIS_AOF_ENABLED=yes  # 必须启用 AOF，实时持久化
+    #   - REDIS_AOF_FSYNC=everysec # 每秒同步一次，权衡性能和数据安全
+    volumes:
+      # Redis数据持久化卷（核心：容器内数据目录映射到命名卷）
+      - database_redis_data:/data  # /data是Redis容器内默认数据目录
+      - ./config/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+# 声明命名卷（用于存储MySQL和Redis的数据，独立于容器生命周期）
+# 关键：声明卷是外部的，不自动创建，直接使用已存在的卷
+volumes:
+  database_mysql_data:
+    external: true  # 表示该卷已存在，Compose 不会创建新卷
+  database_redis_data:
+    external: true

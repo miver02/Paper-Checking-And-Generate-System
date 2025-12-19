@@ -1,28 +1,32 @@
 # 论文生成和查重系统
 
-基于Django框架开发的论文生成和查重系统，集成了AI模型生成功能和第三方查重API。
+基于 Django 框架开发的论文生成和查重系统，集成了 AI 模型生成功能和第三方查重 API。
 
 ## 功能特色
 
 ### 🤖 论文生成模块
-- 使用OpenAI GPT模型生成学术论文
+
+- 使用 OpenAI GPT 模型生成学术论文
 - 支持自定义论文主题和要求
 - 可调节生成参数（温度、最大令牌数等）
 - 异步处理，提高用户体验
 
 ### 🔍 查重检测模块
-- 集成第三方查重API
+
+- 集成第三方查重 API
 - 支持相似度检测和详细报告
 - 模拟查重功能（用于演示）
 - 查重历史记录管理
 
 ### 👤 用户管理
+
 - 用户注册、登录、认证
 - 个人仪表板
 - 使用统计和历史记录
 - 用户偏好设置
 
 ### 🎨 现代化界面
+
 - 响应式设计，支持移动端
 - Bootstrap 5 + Font Awesome
 - 直观的用户界面
@@ -31,11 +35,11 @@
 ## 技术栈
 
 - **后端**: Django 4.2 + Django REST Framework
-- **数据库**: SQLite (可扩展为PostgreSQL/MySQL)
+- **数据库**: SQLite (可扩展为 PostgreSQL/MySQL)
 - **异步任务**: Celery + Redis
-- **AI模型**: OpenAI GPT
+- **AI 模型**: OpenAI GPT
 - **前端**: Bootstrap 5 + jQuery
-- **部署**: 支持Docker部署
+- **部署**: 支持 Docker 部署
 
 ## 快速开始
 
@@ -109,11 +113,11 @@ python manage.py runserver
 
 - 主页: http://127.0.0.1:8000/
 - 管理后台: http://127.0.0.1:8000/admin/
-- API文档: http://127.0.0.1:8000/api/
+- API 文档: http://127.0.0.1:8000/api/
 
-## API接口
+## API 接口
 
-### 论文生成API
+### 论文生成 API
 
 ```bash
 # 创建并生成论文
@@ -131,7 +135,7 @@ POST /api/papers/create_and_generate/
 GET /api/papers/{id}/status/
 ```
 
-### 查重检测API
+### 查重检测 API
 
 ```bash
 # 创建并开始查重
@@ -150,7 +154,7 @@ GET /api/plagiarism/{id}/status/
 
 ```
 Paper-Checking-And-Generate-System/
-├── paper_system/           # Django项目配置
+├── paper/           # Django项目配置
 │   ├── settings.py        # 项目设置
 │   ├── urls.py           # 主URL配置
 │   └── ...
@@ -174,7 +178,7 @@ Paper-Checking-And-Generate-System/
 
 ## 部署说明
 
-### Docker部署
+### Docker 部署
 
 ```bash
 # 构建镜像
@@ -186,25 +190,25 @@ docker run -d -p 8000:8000 --env-file .env paper-system
 
 ### 生产环境配置
 
-1. 使用PostgreSQL或MySQL数据库
-2. 配置Nginx反向代理
-3. 使用Gunicorn作为WSGI服务器
-4. 配置SSL证书
+1. 使用 PostgreSQL 或 MySQL 数据库
+2. 配置 Nginx 反向代理
+3. 使用 Gunicorn 作为 WSGI 服务器
+4. 配置 SSL 证书
 5. 设置定时任务和监控
 
 ## 注意事项
 
-1. **API密钥安全**: 请妥善保管OpenAI API密钥，避免泄露
-2. **查重API**: 默认使用模拟查重，生产环境需配置真实API
-3. **Redis服务**: Celery需要Redis服务支持异步任务
-4. **资源限制**: 注意AI生成的token消耗和API调用频率限制
+1. **API 密钥安全**: 请妥善保管 OpenAI API 密钥，避免泄露
+2. **查重 API**: 默认使用模拟查重，生产环境需配置真实 API
+3. **Redis 服务**: Celery 需要 Redis 服务支持异步任务
+4. **资源限制**: 注意 AI 生成的 token 消耗和 API 调用频率限制
 
 ## 贡献指南
 
-1. Fork项目
+1. Fork 项目
 2. 创建功能分支
 3. 提交代码
-4. 发起Pull Request
+4. 发起 Pull Request
 
 ## 许可证
 
@@ -213,7 +217,8 @@ MIT License
 ## 联系方式
 
 如有问题或建议，请通过以下方式联系：
-- 提交Issue
+
+- 提交 Issue
 - 发送邮件
 
 ---

@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
-    'app.manager', 
+    # 'app.manager', 
     'app.users',  
 ]
 
@@ -144,7 +144,7 @@ STATIC_URL = '/static/'
 # 添加Vue构建文件的路径
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'web/dist',  # 如果Vue项目在web目录下
+    BASE_DIR / 'static/web/dist',  # 如果Vue项目在web目录下
 ]
 
 # Media files
@@ -207,4 +207,4 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE 
 
 # 指定自定义用户模型（关键！）
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "app_users.User"

@@ -1,5 +1,4 @@
 from django.db import models
-from .users import User
 
 ACTION_CHOICES = (
     ("generate", "生成"),
@@ -65,6 +64,7 @@ class UsedLog(models.Model):  # 优化：模型名用单数（Django默认规范
         verbose_name = "使用日志"
         verbose_name_plural = "使用日志"
         db_table = "used_logs"
+        app_label = "app_users"
         ordering = ["-created_at"]  # 优化：默认按创建时间倒序排列（最新日志在前）
         indexes = [  # 优化：添加索引，提升查询效率
             models.Index(fields=["user", "created_at"]),  # 常用查询组合索引

@@ -103,7 +103,7 @@ class PlagiarismCheck(models.Model):
         verbose_name = "查重检测记录"  
         verbose_name_plural = "查重检测记录"
         ordering = ["-created_at"]  # 保留：按创建时间倒序
-        app_label = "users"
+        app_label = "app_users"
         db_table = "plagiarism_checks"  
         # 优化9：添加核心索引，提升查询效率
         indexes = [

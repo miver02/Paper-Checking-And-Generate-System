@@ -126,7 +126,7 @@ class GeneratedPaper(models.Model):
         verbose_name = "论文生成记录"  # 优化：名称更精准
         verbose_name_plural = "论文生成记录"
         ordering = ["-created_at"]  # 保留：按创建时间倒序
-        app_label = "users"
+        app_label = "app_users"
         db_table = "generated_papers"  # 优化：表名改为复数（符合数据库规范）
         # 优化8：添加核心索引，提升查询效率
         indexes = [

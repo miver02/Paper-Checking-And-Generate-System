@@ -1,7 +1,7 @@
 import os
 from django.db import models
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.forms import ValidationError
 from django.utils import timezone
 from django.conf import settings
@@ -29,40 +29,76 @@ def user_avatar_upload_path(instance, filename):
 
 
 class CustomUserManager(BaseUserManager):
-    """自定义用户管理器（仅支持普通用户创建，无超级用户逻辑）"""
+    """自定义用户管理器（支持普通用户、员工用户和超级用户创建）"""
 
     def create_user(self, phone, password=None, **extra_fields):
         """创建普通用户（核心逻辑，必需手机号）"""
-        # 1. 校验手机号非空
         if not phone:
             raise ValueError("手机号是必填字段，不能为空")
         
-        # 2. 手机号格式化：去除空格/横线，保证格式统一
         phone = phone.strip().replace("-", "").replace(" ", "")
-        
-        # 3. 校验手机号格式（复用正则验证器，避免重复逻辑）
         phone_validator = RegexValidator(PHONE_REGEX, message="请输入有效的11位手机号码")
         try:
             phone_validator(phone)
         except ValidationError:
             raise ValueError("请输入有效的11位手机号码")
         
-        # 4. 设置默认值：避免关键字段缺失
-        extra_fields.setdefault("is_staff", False)  # 无需后台权限
-        extra_fields.setdefault("is_active", True)  # 默认激活账号
-        extra_fields.setdefault("is_deleted", False)  # 默认未删除
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("is_deleted", False)
+        extra_fields.setdefault("is_superuser", False)
         
-        # 5. 创建用户实例并加密密码
-        user = self.model(phone=phone,** extra_fields)
-        if password:  # 空密码时不加密（适配免密登录场景）
+        user = self.model(phone=phone, **extra_fields)
+        if password:
             user.set_password(password)
         user.save(using=self._db)
         return user
 
+    def create_staffuser(self, phone, password=None, **extra_fields):
+        """创建具有后台管理权限但非超级用户的员工账户"""
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("is_deleted", False)
+        extra_fields.setdefault("is_superuser", False)
+        
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("员工账户必须设置 is_staff=True.")
+            
+        return self.create_user(phone, password, **extra_fields)
 
-class User(AbstractBaseUser):
+    def create_superuser(self, phone, password=None, **extra_fields):
+        """创建超级用户"""
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("is_deleted", False)
+        extra_fields.setdefault("is_superuser", True)
+        
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("超级用户必须设置 is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("超级用户必须设置 is_superuser=True.")
+        
+        return self.create_user(phone, password, **extra_fields)
+
+    def delete_superuser(self, phone=None):
+        """修复：使用self.model替代硬编码的User，提升兼容性"""
+        try:
+            user = self.model.objects.get(phone=phone)
+            user.delete()
+            print("用户删除成功！")
+        except self.model.DoesNotExist:
+            print("错误：该手机号对应的用户不存在！")
+        except Exception as e:
+            print(f"删除失败：{str(e)}")
+
+    def get_queryset(self):
+        """重写查询集：默认过滤软删除的用户"""
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
     """
-    自定义用户模型（无超级用户/权限管理，仅支持手机号登录）
+    自定义用户模型（支持超级用户权限）
     核心字段：手机号（登录认证）、用户名、邮箱、头像等基础信息
     """
     # 核心登录字段：用户名（可选，昵称）
@@ -100,7 +136,8 @@ class User(AbstractBaseUser):
         upload_to=user_avatar_upload_path,
         blank=True,
         null=True,
-        default=os.path.join(settings.STATIC_URL, "avatars/default.png"),
+        # 修复：默认值使用静态文件路径（而非URL）
+        default="static/avatars/default.png",
         help_text="用户头像图片，支持JPG/PNG格式，建议尺寸200x200"
     )
 
@@ -128,8 +165,9 @@ class User(AbstractBaseUser):
     is_staff = models.BooleanField(
         verbose_name="是否后台管理员",
         default=False,
-        help_text="无需后台权限，固定为False"
+        help_text="用户可以登录到管理站点"
     )
+    
     is_active = models.BooleanField(
         verbose_name="是否激活",
         default=True,
@@ -148,7 +186,7 @@ class User(AbstractBaseUser):
         verbose_name = "用户"
         verbose_name_plural = "用户"
         db_table = "users"
-        app_label = "users"
+        app_label = "app_users"
         # 性能优化：添加核心索引
         indexes = [
             models.Index(fields=["phone"]),  # 登录查询核心索引
@@ -156,7 +194,7 @@ class User(AbstractBaseUser):
             models.Index(fields=["is_deleted", "is_active"]),  # 筛选有效用户
             models.Index(fields=["created_at"]),  # 按创建时间筛选
         ]
-        # 默认排序：按创建时间正序（最新创建在后）
+        # 默认排序：按创建时间倒序（最新创建在前）
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -175,24 +213,33 @@ class User(AbstractBaseUser):
         if self.username:
             self.username = self.username.strip()
 
-    # 适配Django认证框架的基础方法（无超级用户，简化实现）
+    # 修复核心权限方法：还原PermissionsMixin的默认逻辑
+    def has_perm(self, perm, obj=None):
+        """
+        超级用户拥有所有权限，普通用户按权限表判断
+        这是Django权限系统的核心方法，不能固定返回False
+        """
+        # 超级用户默认拥有所有权限
+        if self.is_superuser:
+            return True
+        # 普通用户调用父类方法（PermissionsMixin）判断具体权限
+        return super().has_perm(perm, obj)
+
+    def has_module_perms(self, app_label):
+        """
+        超级用户拥有所有app的权限，普通用户按权限表判断
+        """
+        # 超级用户默认拥有所有app的权限
+        if self.is_superuser:
+            return True
+        # 普通用户调用父类方法判断
+        return super().has_module_perms(app_label)
+
+    # 保留适配框架的基础方法
     def get_full_name(self):
         """返回用户全名（适配框架，返回用户名/手机号）"""
         return self.username or self.phone
 
     def get_short_name(self):
         """返回用户简称（适配框架，手机号脱敏）"""
-        return self.username or (self.phone[:7] + "****" if self.phone else "未知用户")
-
-    @property
-    def is_superuser(self):
-        """无超级用户，固定返回False"""
-        return False
-
-    def has_perm(self, perm, obj=None):
-        """无权限管理，固定返回False"""
-        return False
-
-    def has_module_perms(self, app_label):
-        """无模块权限，固定返回False"""
-        return False
+        return self.username or (self.phone[:3] + "****" + self.phone[-4:] if self.phone else "未知用户")

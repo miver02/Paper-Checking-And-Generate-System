@@ -9,7 +9,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('app.users.urls')),
-    path('', include('app.manager.urls')),  # 主页面路由
+    path('', include('app.users.urls')),  # 主页面路由
 
     # Vue前端路由（必须放在最后）
     # re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),

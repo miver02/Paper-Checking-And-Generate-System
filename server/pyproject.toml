@@ -22,3 +22,7 @@ dependencies = [
     "redis==5.0.1",
     "requests==2.31.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["core", "app", "paper"]  # 只包含实际的 Python 包
+exclude = ["logs", "media", "static"]  # 排除非 Python 包目录

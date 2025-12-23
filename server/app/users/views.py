@@ -4,6 +4,7 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.throttling import UserRateThrottle
 
 # 本地导入
 from .services import LoginService
@@ -11,10 +12,14 @@ from .models import User
 from .serializers.serializers import SuccessResponseSerializer
 
 
+class LoginRateThrottle(UserRateThrottle):
+    rate = '5/m'
+
 class CustomLoginView(ObtainAuthToken):
     username_field = "phone"
     permission_classes = [AllowAny]
     http_method_names = ['post']  # 显式定义支持的 HTTP 方法
+    throttle_classes = [LoginRateThrottle]
 
     @ratelimit(key="ip", rate="5/m", method="POST", block=True)
     def post(self, request, *args, **kwargs):

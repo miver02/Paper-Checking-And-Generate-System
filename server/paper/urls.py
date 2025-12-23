@@ -8,7 +8,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('app.users.urls')),
     path('', include('app.users.urls')),  # 主页面路由
 
     # Vue前端路由（必须放在最后）

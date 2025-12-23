@@ -74,8 +74,7 @@ class LoginService:
         :param user_agent: 登录设备/浏览器信息
         """
         try:
-            
-            logger.info(f"用户{user.phone}登录日志已记录，IP：{ip}")
+            logger.info(f"用户{user.phone}登录日志已记录，IP：{ip_addr}")
         except Exception as e:
             # 日志记录失败不影响登录流程，仅记录错误
             logger.error(f"用户{user.phone}登录日志记录失败：{str(e)}")

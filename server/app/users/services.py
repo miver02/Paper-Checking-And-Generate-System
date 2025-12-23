@@ -1,110 +1,104 @@
-# import openai
-# import requests
-# import json
-# import logging
-# from typing import Dict, Any, Optional
-# from django.conf import settings
-# from django.utils import timezone
-# from . import models
+from rest_framework.exceptions import ValidationError, AuthenticationFailed
+from rest_framework.authtoken.models import Token
 
-# logger = logging.getLogger(__name__)
+from .models import User
+from .utils import logger
 
 
-# class PaperGenerationService:
-#     """论文生成服务"""
-    
-#     def __init__(self):
-#         self.api_key = settings.OPENAI_API_KEY
-#         if self.api_key:
-#             openai.api_key = self.api_key
-    
-#     def generate_paper(self, paper_id: int) -> Dict[str, Any]:
-#         """生成论文内容"""
-#         try:
-#             paper = models.GeneratedPaper.objects.get(id=paper_id)
-#             paper.status = 'generating'
-#             paper.save()
-            
-#             # 构建提示词
-#             prompt = self._build_prompt(paper)
-            
-#             # 调用OpenAI API
-#             response = openai.ChatCompletion.create(
-#                 model=paper.model_used,
-#                 messages=[
-#                     {"role": "system", "content": "你是一个专业的学术论文写作助手。"},
-#                     {"role": "user", "content": prompt}
-#                 ],
-#                 max_tokens=paper.max_tokens,
-#                 temperature=paper.temperature,
-#                 stream=False
-#             )
-            
-#             # 提取生成的内容
-#             generated_content = response.choices[0].message.content
-            
-#             # 更新论文内容
-#             paper.content = generated_content
-#             paper.status = 'completed'
-#             paper.completed_at = timezone.now()
-#             paper.save()
-            
-#             # 更新用户统计
-#             profile, created = UserProfile.objects.get_or_create(user=paper.user)
-#             profile.papers_generated += 1
-#             profile.save()
-            
-#             return {
-#                 'success': True,
-#                 'content': generated_content,
-#                 'word_count': paper.word_count,
-#                 'message': '论文生成成功'
-#             }
-            
-#         except Exception as e:
-#             logger.error(f"论文生成失败: {str(e)}")
-#             return {'success': False, 'message': f'生成失败: {str(e)}'}
-    
-#     def _build_prompt(self, paper: GeneratedPaper) -> str:
-#         """构建生成提示词"""
-#         topic_info = f"主题: {paper.topic.name}" if paper.topic else ""
+class LoginService:
+    @staticmethod
+    def validate_fields(fields: User) -> None:
+        """
+        校验登录必填字段（手机号/密码）是否为空
+        :param login_field: 登录标识（手机号）
+        :param password: 密码
+        :raise ValidationError: 字段为空时抛出异常
+        """
+        if not fields.phone:
+            raise ValidationError("手机号不能为空")
+        if not fields.password:
+            raise ValidationError("密码不能为空")
+
+    @staticmethod
+    def get_and_validate_user(fields: User) -> User:
+        """
+        获取用户并校验账号状态、密码正确性
+        :param phone: 手机号
+        :param password: 明文密码
+        :return: 验证通过的User实例
+        :raise AuthenticationFailed: 验证失败时抛出异常
+        """
+        try:
+            user = User.objects.get(phone=fields.phone, is_deleted=False)
+        except:
+            logger.warning(f"登录失败：手机号{fields.phone}不存在或已删除")
+            raise AuthenticationFailed(detail="手机号或密码错误", code=401)
+
+        if not user.check_password(fields.password):
+            logger.warning(f"登录失败：手机号{fields.phone}密码错误")
+            raise AuthenticationFailed(detail="手机号或密码错误", code=401)
         
-#         prompt = f"""请根据以下要求生成一篇学术论文：
-#             {topic_info}
-#             论文标题: {paper.title}
-#             具体要求:
-#             {paper.requirements}
-#             请生成一篇结构完整的学术论文。
-#         """
+        if not user.is_active:
+            logger.warning(f"登录失败：手机号{fields.phone}账号已被禁用")
+            raise AuthenticationFailed(detail="账号已被禁用，请联系管理员", code=401)
         
-#         return prompt
+        logger.info(f"用户 {fields} 登录验证通过")
+        return user
 
+    @staticmethod
+    def generate_or_refresh_token(user: User) -> tuple[Token, bool]:
+        """
+        生成/刷新用户Token（原子操作，避免并发问题）
+        :param user: User实例
+        :return: (Token实例, 是否是新生成的Token)
+        """
+        # get_or_create是数据库原子操作，避免并发生成多个Token
+        token, created = Token.objects.get_or_create(user=user)
 
-# class PlagiarismCheckService:
-#     """查重检测服务"""
-    
-#     def check_plagiarism(self, check_id: int) -> Dict[str, Any]:
-#         """执行查重检测"""
-#         try:
-#             check = PlagiarismCheck.objects.get(id=check_id)
-#             check.status = 'processing'
-#             check.save()
+        # 如果Token已存在，刷新Token（旧Token失效，提升安全性）
+        if not created:
+            token.key = Token.generate_key()
+            token.save(update_fields=["key"])
+            logger.info(f"用户{user.phone}的Token已刷新")
+        else:
+            logger.info(f"用户{user.phone}的Token已生成（新）")
+
+        return token, created
+
+    @staticmethod
+    def record_login_log(user: User, ip_addr: str = "", user_agent: str = "") -> None:
+        """
+        可选：记录用户登录日志（如需扩展登录日志功能，取消注释即可）
+        :param user: User实例
+        :param ip: 登录IP
+        :param user_agent: 登录设备/浏览器信息
+        """
+        try:
             
-#             # 模拟查重结果
-#             import random
-#             similarity = round(random.uniform(5.0, 25.0), 2)
-            
-#             check.similarity_percentage = similarity
-#             check.status = 'completed'
-#             check.completed_at = timezone.now()
-#             check.save()
-            
-#             return {
-#                 'success': True,
-#                 'similarity_percentage': similarity,
-#                 'message': '查重检测完成'
-#             }
-            
-#         except Exception as e:
-#             logger.error(f"查重检测失败: {str(e)}")
-#             return {'success': False, 'message': f'检测失败: {str(e)}'} 
+            logger.info(f"用户{user.phone}登录日志已记录，IP：{ip}")
+        except Exception as e:
+            # 日志记录失败不影响登录流程，仅记录错误
+            logger.error(f"用户{user.phone}登录日志记录失败：{str(e)}")
+
+    @classmethod
+    def handle_login(
+        cls, login_info: User, ip_addr: str = "", user_agent: str = ""
+    ) -> tuple[User, Token, bool]:
+        """
+        登录核心流程整合（对外提供的统一入口）
+        :param phone: 手机号
+        :param password: 密码
+        :param ip: 登录IP（可选）
+        :param user_agent: 登录设备（可选）
+        :return: (用户实例, Token实例, 是否新生成Token)
+        """
+        # 1. 校验字段非空
+        cls.validate_fields(login_info)
+        # 2. 校验用户合法性
+        user = cls.get_and_validate_user(login_info)
+        # 3. 生成/刷新Token
+        token, created = cls.generate_or_refresh_token(user)
+        # 4. 记录登录日志（可选）
+        # cls.record_login_log(user, ip_addr, user_agent)
+
+        return user, token, created

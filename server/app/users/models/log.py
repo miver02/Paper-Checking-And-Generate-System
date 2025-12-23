@@ -48,6 +48,22 @@ class UsedLog(models.Model):  # 优化：模型名用单数（Django默认规范
         help_text="消耗的token额度",
     )
 
+    ip_addr = models.CharField(
+        max_length=50,
+        verbose_name="IP地址",
+        null=True,
+        blank=True,
+        help_text="请求的IP地址",
+    )
+
+    user_agent = models.CharField(
+        max_length=255,
+        verbose_name="用户代理",
+        null=True,
+        blank=True,
+        help_text="请求的用户代理信息",
+    )
+
     # 优化5：时间字段补充注释，符合中文命名习惯
     created_at = models.DateTimeField(
         auto_now_add=True,

@@ -8,7 +8,7 @@ from ..models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "phone", "bio"]
+        fields = ["username", "phone", "email", "bio"]
 
 
 class SuccessResponseSerializer(serializers.Serializer):

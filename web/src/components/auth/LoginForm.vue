@@ -7,10 +7,10 @@
     label-position="top"
     @submit.prevent="handleLogin"
   >
-    <el-form-item label="用户名" prop="username">
+    <el-form-item label="手机号" prop="phone">
       <el-input 
-        v-model="loginForm.username"
-        placeholder="请输入用户名"
+        v-model="loginForm.phone"
+        placeholder="请输入手机号"
         clearable
       />
     </el-form-item>
@@ -59,13 +59,13 @@ const loading = ref(false)
 const errorMessage = ref('')
 
 const loginForm = reactive({
-  username: '',
+  phone: '',
   password: ''
 })
 
 const loginRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }

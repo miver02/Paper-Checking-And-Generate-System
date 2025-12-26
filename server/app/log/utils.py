@@ -1,4 +1,4 @@
-# utils/log.py 示例
+# utils.py 示例
 import logging
 import os
 from django.conf import settings

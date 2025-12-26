@@ -3,11 +3,11 @@ from rest_framework.exceptions import ValidationError, AuthenticationFailed
 from rest_framework.authtoken.models import Token
 
 from .models import User
-from .utils import logger
+from app.log import logger
 from .serializers import UserRegisterReq
 
 
-# 登服务
+# 登录服务
 class LoginService:
     @staticmethod
     def validate_fields(fields: User) -> None:

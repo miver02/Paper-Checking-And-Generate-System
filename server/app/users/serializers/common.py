@@ -1,14 +1,4 @@
-from typing import Any, ClassVar, Dict, OrderedDict
 from rest_framework import serializers, status
-
-# 本地导入
-from ..models import User
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "phone", "email", "bio"]
 
 
 class SuccessResponseSerializer(serializers.Serializer):

@@ -2,6 +2,7 @@ from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError, AuthenticationFailed
 from rest_framework.authtoken.models import Token
 
+# 导入本地包
 from .models import User
 from app.log import logger
 from .serializers import UserRegisterReq

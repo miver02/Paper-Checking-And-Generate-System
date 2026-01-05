@@ -27,15 +27,15 @@ class CustomLoginView(ObtainAuthToken):
         deserializer = UserLoginReq(data=request.data)
         deserializer.is_valid(raise_exception=True)
 
-        user, token, created = LoginService.handle_login(**deserializer.validated_data)
-
+        user, token,  created_if = LoginService.handle_login(**deserializer.validated_data)
+        
         return Response(
             {
                 "code": status.HTTP_200_OK,
                 "message": "登录成功",
                 "data": {
-                    "token": token,
-                    "created": created,
+                    "token": token.key,
+                    "created_if": created_if,
                     "user": UserBaseInfoRes(user).data,
                 },
             },
@@ -54,15 +54,15 @@ class CustomRegisterView(ObtainAuthToken):
         deserializer = UserRegisterReq(data=request.data)
         deserializer.is_valid(raise_exception=True)
 
-        user, token, created = RegisterService.handle_register(**deserializer.validated_data)
+        user, token, created_if = RegisterService.handle_register(**deserializer.validated_data)
 
         return Response(
             {
                 "code": status.HTTP_200_OK,
                 "message": "登录成功",
                 "data": {
-                    "token": token,
-                    "created": created,
+                    "token": token.key,
+                    "created": created_if,
                     "user": UserBaseInfoRes(user).data,
                 },
             },

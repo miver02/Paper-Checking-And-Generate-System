@@ -44,8 +44,8 @@ class LoginService:
 
         except IntegrityError as e:
             logger.warning(f"用户{user.phone}：Token 创建冲突，兜底获取 - {e}")
-            token, created = Token.objects.get_or_create(user=user)
-            return token, created
+            token, created_if = Token.objects.get_or_create(user=user)
+            return token, created_if
 
     @classmethod
     def handle_login(cls, *, phone: str, password: str) -> tuple[User, Token, bool]:
@@ -53,9 +53,9 @@ class LoginService:
         登录主流程（login_data 来自 serializer.validated_data）
         """
         user = cls.get_and_validate_user(phone, password)
-        token, created = cls.generate_or_refresh_token(user)
+        token, created_if = cls.generate_or_refresh_token(user)
 
-        return user, token, created
+        return user, token, created_if
 
 
 # 注册服务
@@ -86,8 +86,8 @@ class RegisterService:
 
         except IntegrityError:
             # 极端并发兜底
-            token, created = Token.objects.get_or_create(user=user)
-            return token, created
+            token, created_if = Token.objects.get_or_create(user=user)
+            return token, created_if
 
     @classmethod
     def handle_register(cls, *, phone: str, password: str) -> tuple[User, Token, bool]:
@@ -95,5 +95,5 @@ class RegisterService:
         注册主流程（参数来自 serializer.validated_data）
         """
         user = cls.create_user(phone, password)
-        token, created = cls.generate_token(user)
-        return user, token, created
+        token, created_if = cls.generate_token(user)
+        return user, token, created_if

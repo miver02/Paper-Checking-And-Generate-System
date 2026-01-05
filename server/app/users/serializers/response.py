@@ -11,8 +11,3 @@ class UserBaseInfoRes(serializers.ModelSerializer):
 
 
 
-# 用户反序列化器
-class UserRegisterReq(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["phone", "password", "agin_password"]

@@ -10,9 +10,6 @@ from .users_manage import CustomUserManager, user_avatar_upload_path
 
 # 抽离常量：提升可维护性，避免硬编码
 PHONE_REGEX = r"^1[3-9]\d{9}$"
-USERNAME_MAX_LENGTH = 30
-EMAIL_MAX_LENGTH = 255
-BIO_MAX_LENGTH = 500
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -39,7 +36,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    objects = CustomUserManager()
+    objects = CustomUserManager()   # Django / auth / admin
+    users = CustomUserManager()     # 业务层 API
 
     USERNAME_FIELD = "phone"
     REQUIRED_FIELDS = []

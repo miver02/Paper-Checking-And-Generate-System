@@ -22,33 +22,61 @@ def user_avatar_upload_path(instance, filename):
 class CustomUserManager(BaseUserManager):
     """自定义用户管理器"""
 
-    def _create_user(self, phone, password=None, **extra_fields):
+    # ========= 内部工具方法 =========
+
+    @staticmethod
+    def _normalize_phone(phone: str) -> str:
+        """统一手机号格式（去空格、横线）"""
         if not phone:
             raise ValueError("手机号不能为空")
+        return phone.strip().replace("-", "").replace(" ", "")
 
-        phone = phone.strip().replace("-", "").replace(" ", "")
+    def _create_user(self, phone: str, password: str | None = None, **extra_fields):
+        """
+        创建用户的底层实现（统一入口）
+        """
+        phone = self._normalize_phone(phone)
 
         user = self.model(phone=phone, **extra_fields)
-        user.set_password(password)
-        user.full_clean()  # 🔥 关键：触发 Model 校验
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
+        # 🔥 主动触发 Model 层校验（字段长度 / unique / clean）
+        user.full_clean()
         user.save(using=self._db)
         return user
 
-    def create_user(self, phone, password=None, **extra_fields):
+    # ========= 对外 API =========
+
+    def create_user(self, phone: str, password: str | None = None, **extra_fields):
+        """创建普通用户"""
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_active", True)
         return self._create_user(phone, password, **extra_fields)
 
+    def create_superuser(self, phone: str, password: str | None = None, **extra_fields):
+        """创建超级用户"""
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
-    def update_user_fields(self, user_id: int, **fields):
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("超级用户必须 is_staff=True")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("超级用户必须 is_superuser=True")
+
+        return self._create_user(phone, password, **extra_fields)
+
+    def update_user_fields(self, user_id: int, **fields) -> int:
         """
-        纯数据库层更新，不做业务判断
+        纯数据库层更新（不触发 save / signals / full_clean）
         """
         if not fields:
             return 0
 
-        # 防止非法字段写入
         allowed_fields = {
             "username",
             "email",
@@ -58,24 +86,12 @@ class CustomUserManager(BaseUserManager):
         }
 
         update_data = {
-            k: v for k, v in fields.items()
-            if k in allowed_fields
+            key: value
+            for key, value in fields.items()
+            if key in allowed_fields
         }
 
         if not update_data:
             return 0
 
         return self.filter(id=user_id).update(**update_data)
-
-        
-    def create_superuser(self, phone, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_active", True)
-
-        if not extra_fields["is_staff"]:
-            raise ValueError("超级用户必须 is_staff=True")
-        if not extra_fields["is_superuser"]:
-            raise ValueError("超级用户必须 is_superuser=True")
-
-        return self._create_user(phone, password, **extra_fields)

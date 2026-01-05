@@ -1,4 +1,3 @@
-from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -7,9 +6,8 @@ from rest_framework.throttling import UserRateThrottle
 
 # 本地导入
 from .services import LoginService, RegisterService
-from .models import User
 from .serializers import (
-    SuccessResponseSerializer, UserBaseInfoRes, UserRegisterReq
+    UserBaseInfoRes, UserRegisterReq, UserLoginReq
 )
 
 #  登录限流
@@ -26,31 +24,22 @@ class CustomLoginView(ObtainAuthToken):
     throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        # 1, 解析请求参数
-        login_info = User(
-            phone=request.data.get(self.username_field),
-            password=request.data.get("password"),
-        )
+        deserializer = UserLoginReq(data=request.data)
+        deserializer.is_valid(raise_exception=True)
 
-        # 2, 调用服务层处理逻辑
-        user, token, created = LoginService.handle_login(login_info)
+        user, token, created = LoginService.handle_login(**deserializer.validated_data)
 
-        # 3. 构造结构化响应
-        serializer = SuccessResponseSerializer(
+        return Response(
             {
                 "code": status.HTTP_200_OK,
                 "message": "登录成功",
                 "data": {
-                    "token": token.key,  # ✅ 字符串
-                    "created": token.created,  # ✅ datetime
-                    "user": UserBaseInfoRes(user).data,  # ✅ 序列化后的用户数据
+                    "token": token,
+                    "created": created,
+                    "user": UserBaseInfoRes(user).data,
                 },
-            }
-        )
-
-        # 4. 返回响应（传入serializer.data，而非实例）
-        return Response(
-            serializer.data, status=status.HTTP_200_OK  # 核心修复：使用.data属性
+            },
+            status=status.HTTP_200_OK
         )
 
 
@@ -62,30 +51,20 @@ class CustomRegisterView(ObtainAuthToken):
     throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        # 1, 解析请求参数
-        register_info = UserRegisterReq(
-            phone=request.data.get(self.username_field),
-            password=request.data.get("password"),
-            agin_password=request.data.get("agin_password"),
-        )
+        deserializer = UserRegisterReq(data=request.data)
+        deserializer.is_valid(raise_exception=True)
 
-        # 2, 调用服务层处理逻辑
-        user, token, created = RegisterService.handle_register(register_info)
+        user, token, created = RegisterService.handle_register(**deserializer.validated_data)
 
-        # 3. 构造结构化响应
-        serializer = SuccessResponseSerializer(
+        return Response(
             {
                 "code": status.HTTP_200_OK,
                 "message": "登录成功",
                 "data": {
-                    "token": token.key,  # ✅ 字符串
-                    "created": token.created,  # ✅ datetime
-                    "user": UserBaseInfoRes(user).data,  # ✅ 序列化后的用户数据
+                    "token": token,
+                    "created": created,
+                    "user": UserBaseInfoRes(user).data,
                 },
-            }
-        )
-
-        # 4. 返回响应（传入serializer.data，而非实例）
-        return Response(
-            serializer.data, status=status.HTTP_200_OK  # 核心修复：使用.data属性
+            },
+            status=status.HTTP_200_OK
         )

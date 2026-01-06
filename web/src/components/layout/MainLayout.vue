@@ -6,6 +6,7 @@
         </el-header>
 
         <el-main class="layout-main">
+            <!-- 添加消息弹窗 -->
             <div v-if="messages && messages.length > 0" class="message-container">
                 <MessageAlert
                     v-for="(message, index) in messages"
@@ -17,22 +18,22 @@
 
             <!-- 添加登录模态框 -->
             <el-dialog
-              v-model="authStore.isLoginModalVisible"
+              v-model="userStore.isLoginModalVisible"
               title="用户登录"
               width="400px"
               :show-close="true"
-              @close="authStore.toggleLoginModal(false)"
+              @close="userStore.toggleLoginModal(false)"
             >
               <LoginForm @success="handleLoginSuccess" />
             </el-dialog>
 
             <!-- 添加注册模态框 -->
             <el-dialog
-              v-model="authStore.isRegisterModalVisible"
+              v-model="userStore.isRegisterModalVisible"
               title="用户注册"
               width="400px"
               :show-close="true"
-              @close="authStore.toggleRegisterModal(false)"
+              @close="userStore.toggleRegisterModal(false)"
             >
               <RegisterForm @success="handleRegisterSuccess" />
             </el-dialog>
@@ -44,34 +45,47 @@
 </template>
 
 <script setup>
-import { useUserStore } from '@/store/modules/user.js'
+import { useUserStore } from '@/store/user.js'
 import MessageAlert from '@/components/common/MessageAlert.vue'
 import RegisterForm from '@/components/auth/RegisterForm.vue' 
 import LoginForm from '@/components/auth/LoginForm.vue' 
 import Navbar from './Navbar.vue'
 
-const authStore = useUserStore()
+const userStore = useUserStore()
+
+defineProps({
+  messages: {
+    type: Array,
+    default: () => []
+  }
+})
 
 // 处理登录点击事件
 const handleLoginClick = () => {
-  authStore.toggleLoginModal(true)
+  userStore.toggleLoginModal(true)
 }
 
 // 登录成功处理
 const handleLoginSuccess = () => {
-  authStore.toggleLoginModal(false)
+  userStore.toggleLoginModal(false)
   console.log('登录成功')
 }
 
 // 处理注册点击事件
 const handleRegisterClick = () => {
-  authStore.toggleRegisterModal(true)
+  userStore.toggleRegisterModal(true)
 }
 
 // 注册成功处理
 const handleRegisterSuccess = () => {
-  authStore.toggleRegisterModal(false)
+  userStore.toggleRegisterModal(false)
   console.log('注册成功')
+}
+
+// 退出登录成功处理
+const handleLogoutClick = () => {
+  userStore.logout()
+  console.log('成功退出登录')
 }
 
 const removeMessage = (index) => {

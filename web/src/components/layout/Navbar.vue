@@ -37,16 +37,16 @@
     </div>
     
     <div class="navbar-right">
-      <template v-if="isAuthenticated">
+      <template v-if="userStore.isAuthenticated">
         <el-sub-menu index="user">
           <template #title>
             <el-icon><User /></el-icon>
-            {{ username }}
+            {{ userStore.userInfo?.username || userStore.userInfo?.phone }}
           </template>
-          <el-menu-item>
+          <el-menu-item index="user-center">
             <router-link to="/" class="dropdown-item">个人中心</router-link>
           </el-menu-item>
-          <el-menu-item divided>
+          <el-menu-item  index="logout" divided>
             <a href="#" @click.prevent="handleLogoutClick" class="dropdown-item">退出登录</a>
           </el-menu-item>
         </el-sub-menu>
@@ -70,9 +70,9 @@ import {
   Odometer,
   EditPen,
   Search,
-  User
+  User,
 } from '@element-plus/icons-vue'
-import { useUserStore } from '@/store/modules/user.js'
+import { useUserStore } from '@/store/user.js'
 
 
 // 定义emits
@@ -93,7 +93,6 @@ const handleRegisterClick = () => {
 const handleLogoutClick = () => {
   // 实现登出逻辑
   emit('logout-click')
-  console.log('用户登出')
 }
 </script>
 

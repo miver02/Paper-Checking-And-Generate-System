@@ -38,12 +38,12 @@ const routes = [
   // },
 
   // 注册路由
-  { 
-    path: '/register', 
-    name: 'Register', 
-    component: Register,
-    meta: { hideForAuth: true } // 已登录用户不应该访问登录页
-  },
+  // { 
+  //   path: '/register', 
+  //   name: 'Register', 
+  //   component: Register,
+  //   meta: { hideForAuth: true } // 已登录用户不应该访问登录页
+  // },
   
   // 论文相关路由
   // { 

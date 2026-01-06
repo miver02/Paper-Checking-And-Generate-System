@@ -12,32 +12,15 @@ export const useUserStore = defineStore('user', {
     isAuthenticated: (state) => !!state.token
   },
   actions: {
-    setToken(token) {
+    setToken(token, userInfo) {
       this.token = token
+      this.userInfo = userInfo
       localStorage.setItem('token', token)
     },
     logout() {
       this.token = ''
       this.userInfo = null
       localStorage.removeItem('token')
-    },
-    async login(credentials) {
-      try {
-        const response = await api.login(credentials)
-        this.setToken(response.data.token)
-        await this.fetchUserInfo()
-        console.log('登录成功')
-      } catch (error) {
-        console.error('登录失败:', error)
-      }
-    },
-    async fetchUserInfo() {
-      try {
-        const response = await api.getUserInfo()
-        this.userInfo = response.data
-      } catch (error) {
-        console.error('获取用户信息失败:', error)
-      }
     },
     toggleLoginModal(visible) {
       this.isLoginModalVisible = visible

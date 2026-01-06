@@ -1,4 +1,6 @@
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,54 +19,65 @@ class LoginRateThrottle(UserRateThrottle):
 
 
 # 自定义登录视图
-class CustomLoginView(ObtainAuthToken):
-    username_field = "phone"
+class LoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
-    http_method_names = ["post"]  # 显式定义支持的 HTTP 方法
-    throttle_classes = [LoginRateThrottle]
 
-    def post(self, request, *args, **kwargs):
-        deserializer = UserLoginReq(data=request.data)
-        deserializer.is_valid(raise_exception=True)
+    def post(self, request):
+        serializer = UserLoginReq(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        user, token,  created_if = LoginService.handle_login(**deserializer.validated_data)
+        try:
+            result = LoginService.handle_login(**serializer.validated_data)
+            return Response({
+                'code': status.HTTP_200_OK,
+                'message': '登录成功',
+                'data': {
+                    'access': result['access'],
+                    'refresh': result['refresh'],
+                    'user': UserBaseInfoRes(result['user']).data
+                }
+            })
+        except Exception as e:
+            return Response({
+                'code': status.HTTP_400_BAD_REQUEST,
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = UserRegisterReq(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-        return Response(
-            {
-                "code": status.HTTP_200_OK,
-                "message": "登录成功",
-                "data": {
-                    "token": token.key,
-                    "created_if": created_if,
-                    "user": UserBaseInfoRes(user).data,
-                },
-            },
-            status=status.HTTP_200_OK
-        )
+        try:
+            result = RegisterService.handle_register(**serializer.validated_data)
+            return Response({
+                'code': status.HTTP_200_OK,
+                'message': '注册成功',
+                'data': {
+                    'access': result['access'],
+                    'refresh': result['refresh'],
+                    'user': UserBaseInfoRes(result['user']).data
+                }
+            })
+        except Exception as e:
+            return Response({
+                'code': status.HTTP_400_BAD_REQUEST,
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 自定义注册视图
-class CustomRegisterView(ObtainAuthToken):
-    username_field = "phone"
-    permission_classes = [AllowAny]
-    http_method_names = ["post"]  # 显式定义支持的 HTTP 方法
-    throttle_classes = [LoginRateThrottle]
 
-    def post(self, request, *args, **kwargs):
-        deserializer = UserRegisterReq(data=request.data)
-        deserializer.is_valid(raise_exception=True)
+# test受保护接口示例
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
 
-        user, token, created_if = RegisterService.handle_register(**deserializer.validated_data)
-
-        return Response(
-            {
-                "code": status.HTTP_200_OK,
-                "message": "登录成功",
-                "data": {
-                    "token": token.key,
-                    "created": created_if,
-                    "user": UserBaseInfoRes(user).data,
-                },
-            },
-            status=status.HTTP_200_OK
-        )
+    def get(self, request):
+        return Response({
+            "id": request.user.id,
+            "username": request.user.username
+        })

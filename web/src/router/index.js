@@ -21,30 +21,6 @@ const routes = [
     meta: { hideForAuth: true }
   },
   
-  // 登录路由
-  // { 
-  //   path: '/login', 
-  //   name: 'Login', 
-  //   component: Login,
-  //   meta: { hideForAuth: true }, // 已登录用户不应该访问登录页
-  //   beforeEnter: (to, from, next) => {
-  //     // 可以在主页组件中检测路由参数，决定是否显示登录模态框
-  //     next();
-  //   }
-  // },
-  // {
-  //   path: '/login',
-  //   redirect: '/'
-  // },
-
-  // 注册路由
-  // { 
-  //   path: '/register', 
-  //   name: 'Register', 
-  //   component: Register,
-  //   meta: { hideForAuth: true } // 已登录用户不应该访问登录页
-  // },
-  
   // 论文相关路由
   // { 
   //   path: '/papers', 

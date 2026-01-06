@@ -86,10 +86,7 @@ const handleLogin = async () => {
     try {
       loading.value = true
 
-      const res = await login({
-        phone: loginForm.phone,
-        password: loginForm.password
-      })
+      const res = await login(loginForm)
 
       // 根据你后端的返回结构判断
       if (res.code === 200) {
@@ -101,7 +98,7 @@ const handleLogin = async () => {
         emit('success')
         router.push('/')
       } else {
-        ElMessage.error(res.msg || '登录失败')
+        ElMessage.error(res.message || '登录失败')
       }
     } catch (err) {
       ElMessage.error('网络错误')

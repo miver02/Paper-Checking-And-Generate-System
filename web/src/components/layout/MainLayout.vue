@@ -84,7 +84,7 @@ const handleRegisterSuccess = () => {
 
 // 退出登录成功处理
 const handleLogoutClick = () => {
-  userStore.logout()
+  userStore.clearToken()
   console.log('成功退出登录')
 }
 

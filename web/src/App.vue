@@ -4,7 +4,14 @@
 </template>
 
 <script setup>
-// App.vue 现在只负责路由视图渲染
+import { onMounted } from 'vue'
+import { useUserStore } from '@/store/user'
+
+// 在应用启动时加载token
+onMounted(() => {
+  const userStore = useUserStore()
+  userStore.loadTokens()
+})
 </script>
 
 <style>

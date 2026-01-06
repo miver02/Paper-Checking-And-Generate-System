@@ -1,4 +1,3 @@
-// src/api/index.js（Axios 实例）
 import axios from 'axios'
 import { useUserStore } from '@/store/user'
 
@@ -14,17 +13,38 @@ service.interceptors.request.use(config => {
     config.headers.Authorization = `Bearer ${userStore.token}`
   }
   return config
+},
+error => {
+  return Promise.reject(error)
 })
 
 // 响应拦截
 service.interceptors.response.use(
-  res => res.data,
-  err => {
-    if (err.response?.status === 401) {
-      window.dispatchEvent(new Event('open-login'))
+  response => {
+    return response
+  },
+  async error => {
+    const userStore = useUserStore()
+    
+    if (error.response?.status === 401) {
+      // 尝试刷新token
+      const refreshed = await userStore.checkAndRefreshToken()
+      
+      if (refreshed) {
+        // 重新发送原始请求
+        error.config.headers['Authorization'] = `Bearer ${userStore.token}`
+        return service(error.config)
+      } else {
+        // 刷新失败，跳转到登录页
+        ElMessage.error('登录已过期，请重新登录')
+        userStore.clearToken()
+        window.location.href = '/login' // 或 router.push('/login')
+      }
     }
-    return Promise.reject(err)
+    
+    return Promise.reject(error)
   }
 )
+
 
 export default service

@@ -87,18 +87,19 @@ const handleLogin = async () => {
       loading.value = true
 
       const res = await login(loginForm)
-
+      const data = res.data.data
+      
       // 根据你后端的返回结构判断
-      if (res.code === 200) {
+      if (res.data && data.access && data.refresh) {
         ElMessage.success('登录成功')
 
         // 存 token（常见做法）
-        userStore.setToken(res.data.token, res.data.user)
+        userStore.setToken(data.access, data.refresh, data.user || null)
 
         emit('success')
         router.push('/')
       } else {
-        ElMessage.error(res.message || '登录失败')
+        ElMessage.error(res.data.message || '登录失败')
       }
     } catch (err) {
       ElMessage.error('网络错误')

@@ -99,16 +99,16 @@ const handleRegister = async () => {
       loading.value = true
 
       const res = await register(registerForm)
+      const data = res.data.data
 
-      if (res.code === 200) {
+      if (res.data && data.access && data.refresh) {
         ElMessage.success('注册成功')
 
-        userStore.setToken(res.data.token, res.data.user)
-
+        userStore.setToken(data.access, data.refresh, data.user || null)
         emit('success')
         router.push('/')
       } else {
-        ElMessage.error(res.message || '注册失败')
+        ElMessage.error(res.data.message || '注册失败')
       }
     } catch (err) {
       ElMessage.error('网络错误')
@@ -116,7 +116,5 @@ const handleRegister = async () => {
       loading.value = false
     }
   })
-  
-
 }
 </script>

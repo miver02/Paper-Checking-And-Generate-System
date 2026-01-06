@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { generatePaper, getGenerateResult } from '../../api/ai'
+import { generatePaper, getGenerateResult } from '@/api/generate_paper'
 import { ElMessage } from 'element-plus'
 
 const form = ref({ title: '', keywords: '' })

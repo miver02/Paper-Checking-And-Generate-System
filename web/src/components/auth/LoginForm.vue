@@ -50,6 +50,9 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { login } from '@/api/user'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
 
 const router = useRouter()
 const emit = defineEmits(['success'])
@@ -72,19 +75,38 @@ const loginRules = {
   ]
 }
 
+const userStore = useUserStore()
+
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
-  await loginFormRef.value.validate((valid) => {
-    if (valid) {
+
+  await loginFormRef.value.validate(async (valid) => {
+    if (!valid) return
+
+    try {
       loading.value = true
-      // 模拟登录请求
-      setTimeout(() => {
-        loading.value = false
-        // 登录成功后触发事件
+
+      const res = await login({
+        phone: loginForm.phone,
+        password: loginForm.password
+      })
+
+      // 根据你后端的返回结构判断
+      if (res.code === 200) {
+        ElMessage.success('登录成功')
+
+        // 存 token（常见做法）
+        userStore.setToken(res.data.token, res.data.user)
+
         emit('success')
         router.push('/')
-      }, 1000)
+      } else {
+        ElMessage.error(res.msg || '登录失败')
+      }
+    } catch (err) {
+      ElMessage.error('网络错误')
+    } finally {
+      loading.value = false
     }
   })
 }

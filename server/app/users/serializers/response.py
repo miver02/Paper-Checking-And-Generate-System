@@ -7,7 +7,7 @@ from ..models import User
 class UserBaseInfoRes(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "phone", "email", "bio"]
+        fields = ["id", "username", "phone", "email", "bio"]
 
 
 

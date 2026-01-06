@@ -2,6 +2,7 @@
 Django settings for paper project.
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -30,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken', # DRF默认Token
+    'rest_framework_simplejwt',
     'app.users', 
     'app.generate_paper',
     'app.plagiarism_check',
@@ -162,7 +164,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', # 设置访问权限:未登录用户无法访问
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [ 
-        'rest_framework.authentication.TokenAuthentication',  # 使用token认证
+        # 'rest_framework.authentication.TokenAuthentication',  # 使用token认证
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication', # 保留session认证
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # 自动为api响应分页
@@ -207,3 +210,36 @@ CELERY_TIMEZONE = TIME_ZONE
 
 # 指定自定义用户模型（关键！）
 AUTH_USER_MODEL = "app_users.User"
+
+# JWT设置
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # access token有效期
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # refresh token有效期
+    'ROTATE_REFRESH_TOKENS': True,                  # 是否轮换刷新token
+    'BLACKLIST_AFTER_ROTATION': True,               # 刷新后将旧token加入黑名单
+    'UPDATE_LAST_LOGIN': False,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+}

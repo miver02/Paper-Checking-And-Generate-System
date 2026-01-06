@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', {
     isRegisterModalVisible: false
   }),
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.token && !!state.userInfo,
     getToken: (state) => state.token
   },
   actions: {
@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('access_token', accessToken)
       localStorage.setItem('refresh_token', refresh)
       if (userInfo) {
-        localStorage.setItem('user', JSON.stringify(userInfo))
+        localStorage.setItem('userInfo', JSON.stringify(userInfo))
       }
     },
 
@@ -35,11 +35,11 @@ export const useUserStore = defineStore('user', {
     clearToken() {
       this.token = null
       this.refreshToken = null
-      this.user = null
+      this.userInfo = null
       
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
-      localStorage.removeItem('user')
+      localStorage.removeItem('userInfo')
     },
 
     
@@ -63,12 +63,12 @@ export const useUserStore = defineStore('user', {
     loadTokens() {
       const accessToken = localStorage.getItem('access_token')
       const refreshToken = localStorage.getItem('refresh_token')
-      const user = localStorage.getItem('user')
+      const userInfo = localStorage.getItem('userInfo')
       
       if (accessToken && refreshToken) {
         this.token = accessToken
         this.refreshToken = refreshToken
-        this.user = user ? JSON.parse(user) : null
+        this.userInfo = userInfo ? JSON.parse(userInfo) : null
       }
     },
 

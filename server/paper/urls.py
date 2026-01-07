@@ -18,7 +18,7 @@ urlpatterns = [
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     path('admin/', admin.site.urls),  # 管理后台
-    path('', include('app.users.urls')),  # 主页面路由
+    path('user/', include('app.users.urls')),  # 主页面路由
 
     # Vue前端路由（必须放在最后）
     # re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),

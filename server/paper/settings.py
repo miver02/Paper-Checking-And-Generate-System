@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'app.generate_paper',
     'app.plagiarism_check',
     'app.log', 
+    'app.security',
 ]
 
 MIDDLEWARE = [
@@ -177,7 +178,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'rest_framework.throttling.UserRateThrottle',
+        # 自动生效于 所有接口
+        "app.security.throttles.IPThrottle",
+        "app.security.throttles.ApiThrottle",
+        "app.security.throttles.UserThrottle",
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/day',

@@ -4,23 +4,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.throttling import UserRateThrottle
 
 # 本地导入
 from .services import LoginService, RegisterService
 from .serializers import (
     UserBaseInfoRes, UserRegisterReq, UserLoginReq
 )
-
-#  登录限流
-class LoginRateThrottle(UserRateThrottle):
-    rate = "5/m"
-    scope = "login"
+from app.security import LoginIPThrottle, RegisterThrottle
 
 
-# 自定义登录视图
+
+# 登录视图
 class LoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
+    throttle_classes = [LoginIPThrottle]
 
     def post(self, request):
         serializer = UserLoginReq(data=request.data)
@@ -45,8 +42,10 @@ class LoginView(ObtainAuthToken):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RegisterView(APIView):
+# 注册视图
+class RegisterView(ObtainAuthToken):
     permission_classes = [AllowAny]
+    serializer_class = [UserRegisterReq]
     
     def post(self, request):
         serializer = UserRegisterReq(data=request.data)
@@ -72,7 +71,6 @@ class RegisterView(APIView):
 
 
 
-# test受保护接口示例
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 

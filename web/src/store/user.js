@@ -2,6 +2,18 @@
 import { defineStore } from 'pinia'
 import { refreshToken, verifyToken } from '@/api/auth'
 
+
+function parseJwt(token) {
+  try {
+    const base64 = token.split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+    return JSON.parse(atob(base64))
+  } catch {
+    return null
+  }
+}
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     // 登录状态
@@ -9,54 +21,29 @@ export const useUserStore = defineStore('user', {
     refreshToken: localStorage.getItem('refresh_token') || null,
     userInfo: null,
     refreshTimer: null, // 定时器句柄
+    refreshingPromise: null, // refresh锁 --> 避免重复请求
     // 模态框显示状态
     isLoginModalVisible: false,
     isRegisterModalVisible: false
   }),
   getters: {
-    isAuthenticated: (state) => !!state.token && !!state.userInfo,
+    isAuthenticated: (state) => !!state.token,
     getToken: (state) => state.token
   },
   actions: {
-    setToken(accessToken, refresh, userInfo = null) {
+    setToken(accessToken, refreshToken, userInfo = null) {
       this.token = accessToken
-      this.refreshToken = refresh
+      this.refreshToken = refreshToken
       this.userInfo = userInfo
       
       // 存储到localStorage
       localStorage.setItem('access_token', accessToken)
-      localStorage.setItem('refresh_token', refresh)
+      localStorage.setItem('refresh_token', refreshToken)
       if (userInfo) {
         localStorage.setItem('userInfo', JSON.stringify(userInfo))
       }
-    },
 
-    // 登出
-    clearToken() {
-      this.token = null
-      this.refreshToken = null
-      this.userInfo = null
-      
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('userInfo')
-    },
-
-    
-    // 每50分钟检查一次token（比60分钟的token有效期短）
-    startTokenRefreshTimer() {
-      this.refreshTimer = setInterval(async () => {
-        if (this.isAuthenticated) {
-          await this.checkAndRefreshToken()
-        }
-      }, 50 * 60 * 1000) // 50分钟
-    },
-
-    stopTokenRefreshTimer() {
-      if (this.refreshTimer) {
-        clearInterval(this.refreshTimer)
-        this.refreshTimer = null
-      }
+      this.scheduleTokenRefresh()
     },
 
     // 从localStorage加载token
@@ -69,50 +56,96 @@ export const useUserStore = defineStore('user', {
         this.token = accessToken
         this.refreshToken = refreshToken
         this.userInfo = userInfo ? JSON.parse(userInfo) : null
+
+        this.scheduleTokenRefresh()
       }
+    },
+    
+    scheduleTokenRefresh() {
+      if (!this.token) return
+
+      // 清理旧定时器
+      if (this.refreshTimer) {
+        clearTimeout(this.refreshTimer)
+        this.refreshTimer = null
+      }
+
+      const payload = parseJwt(this.token)
+      if (!payload?.exp) return
+
+      const now = Date.now()
+      const refreshAt = payload.exp * 1000 - 5 * 60 * 1000 // 提前5分钟
+      const delay = Math.max(refreshAt - now, 0)
+
+      if (delay === 0) {
+        // 防止多 tab 同步 refresh
+        this.refreshTokenAction()
+        return
+      }
+
+      this.refreshTimer = setTimeout(async () => {
+        await this.refreshTokenAction()
+      }, delay)
     },
 
     // 刷新token
     async refreshTokenAction() {
+      if (this.refreshingPromise) {
+        return this.refreshingPromise
+      }
       if (!this.refreshToken) {
         this.clearToken()
         return false
       }
+      
+      this.refreshingPromise = (async () => {
+        try {
+          const response = await refreshToken({
+            refresh: this.refreshToken
+          })
 
-      try {
-        const response = await refreshToken({
-          refresh: this.refreshToken
-        })
+          if (response.data.access) {
+            this.token = response.data.access
+            localStorage.setItem('access_token', response.data.access)
 
-        if (response.data.access) {
-          this.token = response.data.access
-          // 更新localStorage中的access token
-          localStorage.setItem('access_token', response.data.access)
-          return true
-        }
-      } catch (error) {
-        console.error('Token refresh failed:', error)
-        this.clearToken()
-        return false
-      }
-    },
+            // ⭐ 新增
+            this.scheduleTokenRefresh()
 
-    // 检查token是否需要刷新（在过期前10分钟刷新）
-    async checkAndRefreshToken() {
-      if (!this.token) return false
+            return true
+          }
 
-      try {
-        // 验证当前token
-        await verifyToken({ token: this.token })
-        return true
-      } catch (error) {
-        // 如果验证失败，尝试刷新
-        if (this.refreshToken) {
-          return await this.refreshTokenAction()
-        } else {
+          throw new Error('No access token')
+        } catch (error) {
+          console.error('Token refresh failed:', error)
           this.clearToken()
           return false
+        } finally {
+          // ⭐ 无论成功失败，释放锁
+          this.refreshingPromise = null
         }
+      })()
+
+      return this.refreshingPromise
+    },
+
+    // 登出
+    clearToken() {
+      this.token = null
+      this.refreshToken = null
+      this.userInfo = null
+
+      this.stopTokenRefreshTimer()
+      
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('userInfo')
+    },
+
+    // 清理定时器
+    stopTokenRefreshTimer() {
+      if (this.refreshTimer) {
+        clearTimeout(this.refreshTimer)
+        this.refreshTimer = null
       }
     },
 
@@ -120,6 +153,7 @@ export const useUserStore = defineStore('user', {
     toggleLoginModal(visible) {
       this.isLoginModalVisible = visible
     },
+
     toggleRegisterModal(visible) {
       this.isRegisterModalVisible = visible
     }

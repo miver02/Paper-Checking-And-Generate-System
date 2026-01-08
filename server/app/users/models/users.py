@@ -21,11 +21,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
 
+    display_name = models.CharField(max_length=30, null=True, blank=True)
+
     avatar = models.ImageField(
         upload_to=user_avatar_upload_path,
         blank=True,
         null=True,
-        default="static/avatars/default.png",
     )
 
     bio = models.TextField(max_length=500, blank=True, null=True)

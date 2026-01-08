@@ -4,14 +4,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import (
+    JSONParser,
+    FormParser,
+    MultiPartParser,
+)
 
 # 本地导入
 from .services import LoginService, RegisterService
 from .serializers import (
-    UserBaseInfoRes, UserRegisterReq, UserLoginReq
+    UserBaseInfoRes, UserRegisterReq, UserLoginReq, UpdateUserProfileReq
 )
-from app.security import LoginIPThrottle, RegisterThrottle
+from app.security import (
+    LoginIPThrottle, RegisterThrottle, UserThrottle, ApiThrottle,
+    TokenThrottle,
+)
 
+from .utils import res_common
 
 
 # 登录视图
@@ -25,57 +34,72 @@ class LoginView(ObtainAuthToken):
 
         try:
             result = LoginService.handle_login(**serializer.validated_data)
-            return Response({
-                'code': status.HTTP_200_OK,
-                'message': '登录成功',
-                'data': {
-                    'access': result['access'],
-                    'refresh': result['refresh'],
-                    'user': UserBaseInfoRes(result['user']).data
-                }
-            })
+            data = {
+                'access': result['access'],
+                'refresh': result['refresh'],
+                'user': UserBaseInfoRes(result['user']).data
+            }
+            return res_common.get_response200(message="登录成功", data=data)
         except Exception as e:
-            return Response({
-                'code': status.HTTP_400_BAD_REQUEST,
-                'message': str(e),
-                'data': {}
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return res_common.get_response400(err=str(e))
 
 
 # 注册视图
 class RegisterView(ObtainAuthToken):
     permission_classes = [AllowAny]
-    serializer_class = [UserRegisterReq]
-    
+    throttle_classes = [RegisterThrottle]
+
     def post(self, request):
         serializer = UserRegisterReq(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        try:
-            result = RegisterService.handle_register(**serializer.validated_data)
-            return Response({
-                'code': status.HTTP_200_OK,
-                'message': '注册成功',
-                'data': {
-                    'access': result['access'],
-                    'refresh': result['refresh'],
-                    'user': UserBaseInfoRes(result['user']).data
-                }
-            })
-        except Exception as e:
-            return Response({
-                'code': status.HTTP_400_BAD_REQUEST,
-                'message': str(e),
-                'data': {}
-            }, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            result = RegisterService.handle_register(
+                **serializer.validated_data)
+            data = {
+                'access': result['access'],
+                'refresh': result['refresh'],
+                'user': UserBaseInfoRes(result['user']).data
+            }
+            return res_common.get_response200(message="注册成功", data=data)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
 
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [UserThrottle, ApiThrottle, TokenThrottle]
+    parser_classes = [
+        JSONParser,
+        FormParser,
+        MultiPartParser,
+    ]
 
     def get(self, request):
-        return Response({
-            "id": request.user.id,
-            "username": request.user.username
-        })
+        user = request.user
+
+        return res_common.get_response200("获取成功", UserBaseInfoRes(user).data)
+
+    def patch(self, request):
+        """
+        修改当前登录用户的个人信息（部分更新）
+        """
+        user = request.user
+
+        serializer = UpdateUserProfileReq(
+            instance=user,
+            data=request.data,
+            partial=True
+        )
+
+        if not serializer.is_valid():
+            return res_common.get_response400(serializer.errors)
+        
+        # 删除旧头像（不是默认头像）
+        if "avatar" in serializer.validated_data:
+            if user.avatar and user.avatar.storage.exists(user.avatar.name):
+                user.avatar.delete(save=False)
+
+        serializer.save()
+
+        return res_common.get_response200("更新成功", UpdateUserProfileReq(user).data)

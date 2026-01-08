@@ -1,4 +1,5 @@
 # 这使得paper成为一个Python包 
+import os
 import pymysql
 from django.conf import settings
 
@@ -20,4 +21,15 @@ def create_database():
     cursor.close()
 
 
+
+def create_media_directory():
+    try:
+        if not os.path.exists(settings.MEDIA_ROOT):
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            print(f"Media directory created: {settings.MEDIA_ROOT}")
+    except Exception as e:
+        print(f"Failed to create media directory: {e}")
+
+
 create_database()
+create_media_directory()

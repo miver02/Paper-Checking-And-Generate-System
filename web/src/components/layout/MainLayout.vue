@@ -1,96 +1,49 @@
 <!-- src/components/Layout/MainLayout.vue -->
 <template>
   <el-container class="layout-container">
+    <!-- 头部 -->
     <el-header class="layout-header">
-      <Navbar
-        @login-click="handleLoginClick"
-        @register-click="handleRegisterClick"
-        @logout-click="handleLogoutClick"
-      />
+      <!-- 添加导航栏 -->
+      <Navbar/>
     </el-header>
 
+    <!-- 主体 -->
     <el-main class="layout-main">
       <!-- 添加消息弹窗 -->
       <div v-if="messages && messages.length > 0" class="message-container">
         <MessageAlert
           v-for="(message, index) in messages"
-          :key="index"
+          :key="`message-${index}`"
           :message="message"
           @close="removeMessage(index)"
         />
       </div>
 
-      <!-- 添加登录模态框 -->
-      <el-dialog
-        v-model="userStore.isLoginModalVisible"
-        title="用户登录"
-        width="400px"
-        :show-close="true"
-        @close="userStore.toggleLoginModal(false)"
-      >
-        <LoginForm @success="handleLoginSuccess" />
-      </el-dialog>
-
-      <!-- 添加注册模态框 -->
-      <el-dialog
-        v-model="userStore.isRegisterModalVisible"
-        title="用户注册"
-        width="400px"
-        :show-close="true"
-        @close="userStore.toggleRegisterModal(false)"
-      >
-        <RegisterForm @success="handleRegisterSuccess" />
-      </el-dialog>
+      <!-- 登录 / 注册统一组件 -->
+      <AuthDialog/>
 
       <!-- 页面内容插槽 -->
       <slot />
     </el-main>
+
+    <!-- 尾部 -->
   </el-container>
 </template>
 
 <script setup>
-import { useUserStore } from '@/store/user.js'
 import MessageAlert from '@/components/common/MessageAlert.vue'
-import RegisterForm from '@/components/auth/RegisterForm.vue'
-import LoginForm from '@/components/auth/LoginForm.vue'
 import Navbar from './Navbar.vue'
+import AuthDialog from '@/components/auth/AuthDialog.vue'
 
-const userStore = useUserStore()
-
-defineProps({
+const props = defineProps({
   messages: {
     type: Array,
     default: () => [],
+    validator: (value) => {
+      return Array.isArray(value)
+    }
   },
 })
-
-// 处理登录点击事件
-const handleLoginClick = () => {
-  userStore.toggleLoginModal(true)
-}
-
-// 登录成功处理
-const handleLoginSuccess = () => {
-  userStore.toggleLoginModal(false)
-  console.log('登录成功')
-}
-
-// 处理注册点击事件
-const handleRegisterClick = () => {
-  userStore.toggleRegisterModal(true)
-}
-
-// 注册成功处理
-const handleRegisterSuccess = () => {
-  userStore.toggleRegisterModal(false)
-  console.log('注册成功')
-}
-
-// 退出登录成功处理
-const handleLogoutClick = () => {
-  userStore.clearToken()
-  console.log('成功退出登录')
-}
 
 const removeMessage = index => {
   console.log(`移除消息: ${index}`)

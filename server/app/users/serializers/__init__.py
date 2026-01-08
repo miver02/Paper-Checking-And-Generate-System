@@ -1,4 +1,4 @@
-from .request import UserRegisterReq, UserLoginReq
+from .request import UserRegisterReq, UserLoginReq, UpdateUserProfileReq
 from .response import UserBaseInfoRes
 
 # 导出模型
@@ -9,5 +9,6 @@ __all__ = [
     # 反序列化
     "UserRegisterReq",
     "UserLoginReq",
+    "UpdateUserProfileReq",
 ]
 

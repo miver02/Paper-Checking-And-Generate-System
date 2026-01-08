@@ -11,12 +11,8 @@ def user_avatar_upload_path(instance, filename):
     :param filename: 原始文件名
     :return: 拼接后的上传路径（如avatars/2025/05/12/1/avatar.png）
     """
-    # 新增用户（无ID）时临时存储
-    if not instance.pk:
-        return f"avatars/temp/{os.path.basename(filename)}"
-    # 已有用户：按日期+用户ID分目录
-    date_str = timezone.now().strftime("%Y/%m/%d")
-    return f"avatars/{date_str}/{instance.pk}/{os.path.basename(filename)}"
+    ext = os.path.splitext(filename)[1].lower()
+    return f"avatars/{instance.pk}/avatar{ext}"
 
 
 class CustomUserManager(BaseUserManager):

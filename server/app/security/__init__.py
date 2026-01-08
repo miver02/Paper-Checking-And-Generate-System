@@ -1,6 +1,6 @@
 from .throttles import (
-    IPThrottle, ApiThrottle, UserThrottle, LoginIPThrottle, BaseServiceThrottle,
-    RegisterThrottle
+    IPThrottle, ApiThrottle, UserThrottle, LoginIPThrottle,
+    RegisterThrottle, TokenThrottle
 )
 
 
@@ -10,6 +10,6 @@ __all__ = [
     "ApiThrottle",
     "UserThrottle",
     "LoginIPThrottle",
-    "BaseServiceThrottle",
     "RegisterThrottle",
+    "TokenThrottle",
 ]

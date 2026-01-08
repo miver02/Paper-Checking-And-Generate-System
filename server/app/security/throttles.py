@@ -63,3 +63,11 @@ class RegisterThrottle(BaseServiceThrottle):
             ip_key(ip),
             api_key("register")
         )
+
+# Token 维度限流（防 token 泄露）
+class TokenThrottle(BaseServiceThrottle):
+    rate = 100
+    per = 60
+
+    def get_key(self, request):
+        return f"token:{request.auth}"

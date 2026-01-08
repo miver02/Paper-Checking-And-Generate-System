@@ -13,16 +13,16 @@
 const props = defineProps({
   message: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['close'])
 
 // 根据消息类型返回 Element Plus 对应的类型
-const getMessageType = (tags) => {
+const getMessageType = tags => {
   if (!tags) return 'info'
-  
+
   if (tags.includes('error')) return 'error'
   if (tags.includes('warning')) return 'warning'
   if (tags.includes('success')) return 'success'

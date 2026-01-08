@@ -8,57 +8,52 @@
     text-color="#fff"
     active-text-color="#ffd04b"
   >
+    <!-- 左侧 -->
     <div class="navbar-left">
-      <el-menu-item index="0">
+      <el-menu-item index="/">
         <el-icon><Reading /></el-icon>
         <span>论文系统</span>
       </el-menu-item>
     </div>
-    
+
+    <!-- 中间 -->
     <div class="navbar-center">
-      <el-menu-item index="1">
-        <router-link to="/" class="nav-link">
-          <el-icon><Odometer /></el-icon>
-          <span>仪表板</span>
-        </router-link>
-      </el-menu-item>
-      <el-menu-item index="2">
-        <router-link to="/ai/generate" class="nav-link">
-          <el-icon><EditPen /></el-icon>
-          <span>生成论文</span>
-        </router-link>
-      </el-menu-item>
-      <el-menu-item index="3">
-        <router-link to="/ai/check" class="nav-link">
-          <el-icon><Search /></el-icon>
-          <span>查重检测</span>
-        </router-link>
+      <el-menu-item
+        v-for="item in menuList"
+        :key="item.index"
+        :index="item.index"
+      >
+        <el-icon>
+          <component :is="item.icon" />
+        </el-icon>
+        <span>{{ item.label }}</span>
       </el-menu-item>
     </div>
-    
+
+    <!-- 右侧 -->
     <div class="navbar-right">
       <template v-if="userStore.isAuthenticated">
         <el-sub-menu index="user">
           <template #title>
             <el-icon><User /></el-icon>
-            {{ userStore.userInfo?.username || userStore.userInfo?.phone }}
+            {{ userName }}
           </template>
-          <el-menu-item index="user-center">
-            <router-link to="/" class="dropdown-item">个人中心</router-link>
-          </el-menu-item>
-          <el-menu-item  index="logout" divided>
-            <a href="#" @click.prevent="handleLogoutClick" class="dropdown-item">退出登录</a>
+
+          <el-menu-item index="/user"> 个人中心 </el-menu-item>
+
+          <el-menu-item index="logout" divided @click="emitLogout">
+            退出登录
           </el-menu-item>
         </el-sub-menu>
       </template>
-      
+
       <template v-else>
-        <el-menu-item index="login" @click="handleLoginClick">
-           <a href="#" class="nav-link">登录</a>
-        </el-menu-item>
-        <el-menu-item index="register" @click="handleRegisterClick">
-           <a href="#" class="nav-link">注册</a>
-        </el-menu-item>
+        <el-menu-item index="login" @click="emitAction('login')"
+          >登录</el-menu-item
+        >
+        <el-menu-item index="register" @click="emitAction('register')"
+          >注册</el-menu-item
+        >
       </template>
     </div>
   </el-menu>
@@ -72,26 +67,31 @@ import {
   Search,
   User,
 } from '@element-plus/icons-vue'
-import { useUserStore } from '@/store/user.js'
+import { computed } from 'vue'
+import { useUserStore } from '@/store/user'
 
-
-// 定义emits
+// emits
 const emit = defineEmits(['login-click', 'register-click', 'logout-click'])
 const userStore = useUserStore()
 
+/* 中间菜单配置 */
+const menuList = [
+  { index: '/', label: '仪表板', icon: Odometer },
+  { index: '/ai/generate', label: '生成论文', icon: EditPen },
+  { index: '/ai/check', label: '查重检测', icon: Search },
+]
 
-// 登录
-const handleLoginClick = () => {
-  emit('login-click')
+/* 用户名显示 */
+const userName = computed(
+  () => userStore.userInfo?.display_name || userStore.userInfo?.phone
+)
+
+/* 事件统一处理 */
+const emitAction = type => {
+  emit(`${type}-click`)
 }
 
-// 注册
-const handleRegisterClick = () => {
-  emit('register-click')
-}
-
-const handleLogoutClick = () => {
-  // 实现登出逻辑
+const emitLogout = () => {
   emit('logout-click')
 }
 </script>
@@ -121,13 +121,5 @@ const handleLogoutClick = () => {
 .navbar-right {
   flex: 1;
   justify-content: flex-end;
-}
-
-.nav-link,
-.dropdown-item {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  width: 100%;
 }
 </style>

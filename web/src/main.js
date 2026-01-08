@@ -10,7 +10,6 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import './style.css'
 import 'uno.css'
 
-
 const app = createApp(App)
 
 // 注册 Element Plus 图标

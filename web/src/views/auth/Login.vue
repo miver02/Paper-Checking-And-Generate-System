@@ -11,8 +11,8 @@
                 <span>用户登录</span>
               </div>
             </template>
-            
-            <el-form 
+
+            <el-form
               ref="loginFormRef"
               :model="loginForm"
               :rules="loginRules"
@@ -20,13 +20,13 @@
               @submit.prevent="handleLogin"
             >
               <el-form-item label="用户名" prop="username">
-                <el-input 
+                <el-input
                   v-model="loginForm.username"
                   placeholder="请输入用户名"
                   clearable
                 />
               </el-form-item>
-              
+
               <el-form-item label="密码" prop="password">
                 <el-input
                   v-model="loginForm.password"
@@ -35,7 +35,7 @@
                   show-password
                 />
               </el-form-item>
-              
+
               <el-form-item v-if="errorMessage">
                 <el-alert
                   :title="errorMessage"
@@ -44,10 +44,10 @@
                   closable
                 />
               </el-form-item>
-              
+
               <el-form-item>
-                <el-button 
-                  type="primary" 
+                <el-button
+                  type="primary"
                   native-type="submit"
                   :loading="loading"
                   style="width: 100%"
@@ -56,9 +56,11 @@
                 </el-button>
               </el-form-item>
             </el-form>
-            
+
             <div class="auth-footer">
-              <p>还没有账户？ <router-link to="/register">立即注册</router-link></p>
+              <p>
+                还没有账户？ <router-link to="/register">立即注册</router-link>
+              </p>
             </div>
           </el-card>
         </el-col>
@@ -81,22 +83,18 @@ const errorMessage = ref('')
 
 const loginForm = reactive({
   username: '',
-  password: ''
+  password: '',
 })
 
 const loginRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
-  ]
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
-  await loginFormRef.value.validate((valid) => {
+
+  await loginFormRef.value.validate(valid => {
     if (valid) {
       loading.value = true
       // 模拟登录请求

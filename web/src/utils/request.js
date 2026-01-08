@@ -3,20 +3,22 @@ import { useUserStore } from '@/store/user'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_PATH || '/api', // 后端 API 前缀
-  timeout: import.meta.env.VITE_TIMEOUT
+  timeout: import.meta.env.VITE_TIMEOUT,
 })
 
 // 请求拦截器（添加 Token）
-service.interceptors.request.use(config => {
-  const userStore = useUserStore()
-  if (userStore.token) {
-    config.headers.Authorization = `Bearer ${userStore.token}`
+service.interceptors.request.use(
+  config => {
+    const userStore = useUserStore()
+    if (userStore.token) {
+      config.headers.Authorization = `Bearer ${userStore.token}`
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
   }
-  return config
-},
-error => {
-  return Promise.reject(error)
-})
+)
 
 // 响应拦截
 service.interceptors.response.use(
@@ -25,11 +27,11 @@ service.interceptors.response.use(
   },
   async error => {
     const userStore = useUserStore()
-    
+
     if (error.response?.status === 401) {
       // 尝试刷新token
       const refreshed = await userStore.checkAndRefreshToken()
-      
+
       if (refreshed) {
         // 重新发送原始请求
         error.config.headers['Authorization'] = `Bearer ${userStore.token}`
@@ -41,10 +43,9 @@ service.interceptors.response.use(
         window.location.href = '/login' // 或 router.push('/login')
       }
     }
-    
+
     return Promise.reject(error)
   }
 )
-
 
 export default service

@@ -14,49 +14,49 @@ import PaperResult from '@/views/paper/PaperResult.vue'
 // 路由配置
 const routes = [
   // 首页路由
-  { 
-    path: '/', 
-    name: 'Home', 
+  {
+    path: '/',
+    name: 'Home',
     component: Home,
-    meta: { hideForAuth: true }
+    meta: { hideForAuth: true },
   },
-  
+
   // 论文相关路由
-  // { 
-  //   path: '/papers', 
-  //   name: 'PaperList', 
+  // {
+  //   path: '/papers',
+  //   name: 'PaperList',
   //   component: PaperList,
   //   meta: { requiresAuth: true }
   // },
-  // { 
-  //   path: '/papers/create', 
-  //   name: 'PaperCreate', 
+  // {
+  //   path: '/papers/create',
+  //   name: 'PaperCreate',
   //   component: PaperEdit,
   //   meta: { requiresAuth: true }
   // },
-  // { 
-  //   path: '/papers/:id/edit', 
-  //   name: 'PaperEdit', 
+  // {
+  //   path: '/papers/:id/edit',
+  //   name: 'PaperEdit',
   //   component: PaperEdit,
   //   meta: { requiresAuth: true }
   // },
-  // { 
-  //   path: '/papers/:id/result', 
-  //   name: 'PaperResult', 
+  // {
+  //   path: '/papers/:id/result',
+  //   name: 'PaperResult',
   //   component: PaperResult,
   //   meta: { requiresAuth: true }
   // },
-  
+
   // AI功能路由
-  // { 
-  //   path: '/ai/generate', 
-  //   name: 'AIGenerate', 
+  // {
+  //   path: '/ai/generate',
+  //   name: 'AIGenerate',
   //   component: AIGenerate,
   //   meta: { requiresAuth: true }
   // },
-  // { 
-  //   path: '/ai/check', 
-  //   name: 'AICheck', 
+  // {
+  //   path: '/ai/check',
+  //   name: 'AICheck',
   //   component: AICheck,
   //   meta: { requiresAuth: true }
   // }
@@ -64,7 +64,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
 export default router

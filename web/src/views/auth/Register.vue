@@ -11,8 +11,8 @@
                 <span>用户注册</span>
               </div>
             </template>
-            
-            <el-form 
+
+            <el-form
               ref="registerFormRef"
               :model="registerForm"
               :rules="registerRules"
@@ -20,13 +20,13 @@
               @submit.prevent="handleRegister"
             >
               <el-form-item label="用户名" prop="username">
-                <el-input 
+                <el-input
                   v-model="registerForm.username"
                   placeholder="请输入用户名"
                   clearable
                 />
               </el-form-item>
-              
+
               <el-form-item label="密码" prop="password">
                 <el-input
                   v-model="registerForm.password"
@@ -35,7 +35,7 @@
                   show-password
                 />
               </el-form-item>
-              
+
               <el-form-item label="确认密码" prop="confirmPassword">
                 <el-input
                   v-model="registerForm.confirmPassword"
@@ -44,7 +44,7 @@
                   show-password
                 />
               </el-form-item>
-              
+
               <el-form-item v-if="errorMessage">
                 <el-alert
                   :title="errorMessage"
@@ -53,10 +53,10 @@
                   closable
                 />
               </el-form-item>
-              
+
               <el-form-item>
-                <el-button 
-                  type="primary" 
+                <el-button
+                  type="primary"
                   native-type="submit"
                   :loading="loading"
                   style="width: 100%"
@@ -65,7 +65,7 @@
                 </el-button>
               </el-form-item>
             </el-form>
-            
+
             <div class="auth-footer">
               <p>已有账户？ <router-link to="/login">立即登录</router-link></p>
             </div>
@@ -91,16 +91,14 @@ const errorMessage = ref('')
 const registerForm = reactive({
   username: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 const registerRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+    { min: 6, message: '密码长度至少6位', trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
@@ -112,15 +110,15 @@ const registerRules = {
           callback()
         }
       },
-      trigger: 'blur'
-    }
-  ]
+      trigger: 'blur',
+    },
+  ],
 }
 
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
-  await registerFormRef.value.validate((valid) => {
+
+  await registerFormRef.value.validate(valid => {
     if (valid) {
       loading.value = true
       // 模拟注册请求

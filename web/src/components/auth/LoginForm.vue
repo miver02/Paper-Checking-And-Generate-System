@@ -1,6 +1,6 @@
 <!-- src/components/auth/LoginForm.vue -->
 <template>
-  <el-form 
+  <el-form
     ref="loginFormRef"
     :model="loginForm"
     :rules="loginRules"
@@ -8,13 +8,13 @@
     @submit.prevent="handleLogin"
   >
     <el-form-item label="手机号" prop="phone">
-      <el-input 
+      <el-input
         v-model="loginForm.phone"
         placeholder="请输入手机号"
         clearable
       />
     </el-form-item>
-    
+
     <el-form-item label="密码" prop="password">
       <el-input
         v-model="loginForm.password"
@@ -23,7 +23,7 @@
         show-password
       />
     </el-form-item>
-    
+
     <el-form-item v-if="errorMessage">
       <el-alert
         :title="errorMessage"
@@ -33,10 +33,10 @@
         @close="errorMessage = ''"
       />
     </el-form-item>
-    
+
     <el-form-item>
-      <el-button 
-        type="primary" 
+      <el-button
+        type="primary"
         native-type="submit"
         :loading="loading"
         style="width: 100%"
@@ -63,16 +63,12 @@ const errorMessage = ref('')
 
 const loginForm = reactive({
   phone: '',
-  password: ''
+  password: '',
 })
 
 const loginRules = {
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
-  ]
+  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
 const userStore = useUserStore()
@@ -80,7 +76,7 @@ const userStore = useUserStore()
 const handleLogin = async () => {
   if (!loginFormRef.value) return
 
-  await loginFormRef.value.validate(async (valid) => {
+  await loginFormRef.value.validate(async valid => {
     if (!valid) return
 
     try {
@@ -88,7 +84,7 @@ const handleLogin = async () => {
 
       const res = await login(loginForm)
       const data = res.data.data
-      
+
       // 根据你后端的返回结构判断
       if (res.data && data.access && data.refresh) {
         ElMessage.success('登录成功')

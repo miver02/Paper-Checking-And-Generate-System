@@ -1,4 +1,3 @@
-
 <template>
   <div class="ai-generate">
     <el-form :model="form" label-width="120px">

@@ -14,7 +14,7 @@ const pathSrc = path.resolve(__dirname, 'src')
 export default defineConfig({
   plugins: [
     Vue(),
-    UnoCSS(), 
+    UnoCSS(),
     AutoImport({
       // Auto import functions from Vue, e.g. ref, reactive, toRef...
       // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
@@ -59,8 +59,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')  // 别名 @ 指向 src
-    }
+      '@': path.resolve(__dirname, './src'), // 别名 @ 指向 src
+    },
   },
   server: {
     proxy: {
@@ -68,8 +68,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:6666',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+        rewrite: path => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

@@ -4,7 +4,7 @@ export function login(data) {
   return service({
     url: '/user/login/',
     method: 'post',
-    data
+    data,
   })
 }
 
@@ -12,6 +12,22 @@ export function register(data) {
   return service({
     url: '/user/register/',
     method: 'post',
-    data
+    data,
+  })
+}
+
+export function getProfile(data) {
+  return service({
+    url: '/user/profile/',
+    method: 'get',
+    data,
+  })
+}
+
+export function updateProfile(data) {
+  return service({
+    url: '/user/profile/',
+    method: 'patch',
+    data,
   })
 }

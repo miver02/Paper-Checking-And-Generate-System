@@ -2,12 +2,9 @@
 import { defineStore } from 'pinia'
 import { refreshToken, verifyToken } from '@/api/auth'
 
-
 function parseJwt(token) {
   try {
-    const base64 = token.split('.')[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
     return JSON.parse(atob(base64))
   } catch {
     return null
@@ -24,18 +21,18 @@ export const useUserStore = defineStore('user', {
     refreshingPromise: null, // refresh锁 --> 避免重复请求
     // 模态框显示状态
     isLoginModalVisible: false,
-    isRegisterModalVisible: false
+    isRegisterModalVisible: false,
   }),
   getters: {
-    isAuthenticated: (state) => !!state.token,
-    getToken: (state) => state.token
+    isAuthenticated: state => !!state.token,
+    getToken: state => state.token,
   },
   actions: {
     setToken(accessToken, refreshToken, userInfo = null) {
       this.token = accessToken
       this.refreshToken = refreshToken
       this.userInfo = userInfo
-      
+
       // 存储到localStorage
       localStorage.setItem('access_token', accessToken)
       localStorage.setItem('refresh_token', refreshToken)
@@ -51,7 +48,7 @@ export const useUserStore = defineStore('user', {
       const accessToken = localStorage.getItem('access_token')
       const refreshToken = localStorage.getItem('refresh_token')
       const userInfo = localStorage.getItem('userInfo')
-      
+
       if (accessToken && refreshToken) {
         this.token = accessToken
         this.refreshToken = refreshToken
@@ -60,7 +57,7 @@ export const useUserStore = defineStore('user', {
         this.scheduleTokenRefresh()
       }
     },
-    
+
     scheduleTokenRefresh() {
       if (!this.token) return
 
@@ -97,11 +94,11 @@ export const useUserStore = defineStore('user', {
         this.clearToken()
         return false
       }
-      
+
       this.refreshingPromise = (async () => {
         try {
           const response = await refreshToken({
-            refresh: this.refreshToken
+            refresh: this.refreshToken,
           })
 
           if (response.data.access) {
@@ -135,7 +132,7 @@ export const useUserStore = defineStore('user', {
       this.userInfo = null
 
       this.stopTokenRefreshTimer()
-      
+
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('userInfo')
@@ -156,6 +153,6 @@ export const useUserStore = defineStore('user', {
 
     toggleRegisterModal(visible) {
       this.isRegisterModalVisible = visible
-    }
-  }
+    },
+  },
 })

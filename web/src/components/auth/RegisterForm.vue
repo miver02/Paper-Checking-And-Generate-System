@@ -1,6 +1,6 @@
 <!-- src/components/auth/RegisterForm.vue -->
 <template>
-  <el-form 
+  <el-form
     ref="registerFormRef"
     :model="registerForm"
     :rules="registerRules"
@@ -8,13 +8,13 @@
     @submit.prevent="handleRegister"
   >
     <el-form-item label="手机号" prop="phone">
-      <el-input 
+      <el-input
         v-model="registerForm.phone"
         placeholder="请输入用户名"
         clearable
       />
     </el-form-item>
-    
+
     <el-form-item label="密码" prop="password">
       <el-input
         v-model="registerForm.password"
@@ -23,7 +23,7 @@
         show-password
       />
     </el-form-item>
-    
+
     <el-form-item label="密码" prop="confirm_password">
       <el-input
         v-model="registerForm.confirm_password"
@@ -42,10 +42,10 @@
         @close="errorMessage = ''"
       />
     </el-form-item>
-    
+
     <el-form-item>
-      <el-button 
-        type="primary" 
+      <el-button
+        type="primary"
         native-type="submit"
         :loading="loading"
         style="width: 100%"
@@ -78,21 +78,17 @@ const registerForm = reactive({
 })
 
 const registerRules = {
-  phone: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
-  ],
+  phone: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   confirm_password: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' }
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
   ],
 }
 
 const handleRegister = async () => {
   if (!registerFormRef.value) return
 
-  await registerFormRef.value.validate(async (valid) => {
+  await registerFormRef.value.validate(async valid => {
     if (!valid) return
 
     try {

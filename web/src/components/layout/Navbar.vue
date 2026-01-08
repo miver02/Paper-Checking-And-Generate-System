@@ -41,17 +41,17 @@
 
           <el-menu-item index="/user"> 个人中心 </el-menu-item>
 
-          <el-menu-item index="logout" divided @click="emitLogout">
+          <el-menu-item index="logout" divided @click="handleLogoutClick">
             退出登录
           </el-menu-item>
         </el-sub-menu>
       </template>
 
       <template v-else>
-        <el-menu-item index="login" @click="emitAction('login')"
+        <el-menu-item index="login" @click="handleLoginClick"
           >登录</el-menu-item
         >
-        <el-menu-item index="register" @click="emitAction('register')"
+        <el-menu-item index="register" @click="handleRegisterClick"
           >注册</el-menu-item
         >
       </template>
@@ -69,9 +69,8 @@ import {
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useUserStore } from '@/store/user'
+import { ElMessage } from 'element-plus'
 
-// emits
-const emit = defineEmits(['login-click', 'register-click', 'logout-click'])
 const userStore = useUserStore()
 
 /* 中间菜单配置 */
@@ -86,13 +85,24 @@ const userName = computed(
   () => userStore.userInfo?.display_name || userStore.userInfo?.phone
 )
 
-/* 事件统一处理 */
-const emitAction = type => {
-  emit(`${type}-click`)
+// 显示登录模态框
+const handleLoginClick = () => {
+  userStore.toggleLoginModal(true)
 }
 
-const emitLogout = () => {
-  emit('logout-click')
+// 显示注册模态框
+const handleRegisterClick = () => {
+  userStore.toggleRegisterModal(true)
+}
+
+// 退出登录成功处理
+const handleLogoutClick = () => {
+  try {
+    userStore.clearToken()
+    ElMessage.success('成功退出登录')
+  } catch (error) {
+    ElMessage.error('退出登录失败:', error)
+  }
 }
 </script>
 

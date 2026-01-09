@@ -39,7 +39,7 @@
             {{ userName }}
           </template>
 
-          <el-menu-item index="/user"> 个人中心 </el-menu-item>
+          <el-menu-item index="/profile"> 个人中心 </el-menu-item>
 
           <el-menu-item index="logout" divided @click="handleLogoutClick">
             退出登录
@@ -85,14 +85,13 @@ const userName = computed(
   () => userStore.userInfo?.display_name || userStore.userInfo?.phone
 )
 
-// 显示登录模态框
+//  登录注册点击事件
+const emit = defineEmits(['login-click', 'register-click'])
 const handleLoginClick = () => {
-  userStore.toggleLoginModal(true)
+  emit('login-click')
 }
-
-// 显示注册模态框
 const handleRegisterClick = () => {
-  userStore.toggleRegisterModal(true)
+  emit('register-click')
 }
 
 // 退出登录成功处理

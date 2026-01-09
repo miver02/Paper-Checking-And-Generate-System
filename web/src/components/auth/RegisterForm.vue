@@ -95,9 +95,9 @@ const handleRegister = async () => {
       loading.value = true
 
       const res = await register(registerForm)
-      const data = res.data.data
 
-      if (res.data && data.access && data.refresh) {
+      if (res.data.code == 200) {
+        const data = res.data.data
         ElMessage.success('注册成功')
 
         userStore.setToken(data.access, data.refresh, data.user || null)

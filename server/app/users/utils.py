@@ -22,14 +22,14 @@ class ResponseCommon:
             'code': status.HTTP_400_BAD_REQUEST,
             'message': err,
             'data': {}
-        }, status=status.HTTP_400_BAD_REQUEST)
+        })
     
     def get_response401(self):
         return Response({
             'code': status.HTTP_401_UNAUTHORIZED,
             'message': 'Unauthorized',
             'data': {}
-        }, status=status.HTTP_401_UNAUTHORIZED)
+        })
 
 
 res_common = ResponseCommon()

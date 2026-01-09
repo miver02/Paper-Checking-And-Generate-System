@@ -26,11 +26,15 @@ from .utils import res_common
 # 登录视图
 class LoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
-    throttle_classes = [LoginIPThrottle]
+    # throttle_classes = [LoginIPThrottle]
 
     def post(self, request):
         serializer = UserLoginReq(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            err = serializer.errors
+            if "phone" in err:
+                return res_common.get_response400(err=err["phone"][0])
+            return res_common.get_response400(str(err))
 
         try:
             result = LoginService.handle_login(**serializer.validated_data)
@@ -47,11 +51,17 @@ class LoginView(ObtainAuthToken):
 # 注册视图
 class RegisterView(ObtainAuthToken):
     permission_classes = [AllowAny]
-    throttle_classes = [RegisterThrottle]
+    # throttle_classes = [RegisterThrottle]
 
     def post(self, request):
         serializer = UserRegisterReq(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            err = serializer.errors
+            if "phone" in err:
+                return res_common.get_response400(err=err["phone"][0])
+            if "non_field_errors" in err:
+                return res_common.get_response400(err=err["non_field_errors"][0])
+            return res_common.get_response400(str(err))
 
         try:
             result = RegisterService.handle_register(
@@ -68,7 +78,7 @@ class RegisterView(ObtainAuthToken):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
-    throttle_classes = [UserThrottle, ApiThrottle, TokenThrottle]
+    # throttle_classes = [UserThrottle, ApiThrottle, TokenThrottle]
     parser_classes = [
         JSONParser,
         FormParser,
@@ -76,9 +86,12 @@ class ProfileView(APIView):
     ]
 
     def get(self, request):
-        user = request.user
+        try:
+            user = request.user
 
-        return res_common.get_response200("获取成功", UserBaseInfoRes(user).data)
+            return res_common.get_response200("获取成功", UserBaseInfoRes(user).data)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
 
     def patch(self, request):
         """
@@ -93,13 +106,21 @@ class ProfileView(APIView):
         )
 
         if not serializer.is_valid():
-            return res_common.get_response400(serializer.errors)
+            err = serializer.errors
+            if 'display_name' in err:
+                return res_common.get_response400(err=err['display_name'][0])
+            if 'avatar' in err:
+                return res_common.get_response400(err=err['avatar'][0])
+            return res_common.get_response400(str(err))
+        try:
+            # 删除旧头像（不是默认头像）
+            if "avatar" in serializer.validated_data:
+                if user.avatar and user.avatar.storage.exists(user.avatar.name):
+                    user.avatar.delete(save=False)
+
+            serializer.save()
+
+            return res_common.get_response200("更新成功", UpdateUserProfileReq(user).data)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
         
-        # 删除旧头像（不是默认头像）
-        if "avatar" in serializer.validated_data:
-            if user.avatar and user.avatar.storage.exists(user.avatar.name):
-                user.avatar.delete(save=False)
-
-        serializer.save()
-
-        return res_common.get_response200("更新成功", UpdateUserProfileReq(user).data)

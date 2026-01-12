@@ -1,6 +1,7 @@
 <!-- src/components/Common/MessageAlert.vue -->
 <template>
   <el-alert
+    mb-10px
     :title="message.text"
     :type="getMessageType(message.tags)"
     :closable="true"
@@ -33,9 +34,3 @@ const handleClose = () => {
   emit('close')
 }
 </script>
-
-<style scoped>
-.el-alert {
-  margin-bottom: 10px;
-}
-</style>

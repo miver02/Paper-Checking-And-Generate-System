@@ -48,20 +48,4 @@ const handleLoginSuccess = () => {
 const handleRegisterSuccess = () => {
   userStore.toggleRegisterModal(false)
 }
-
-// 显示登录模态框
-const handleLoginClick = () => {
-  userStore.toggleLoginModal(true)
-}
-
-// 显示注册模态框
-const handleRegisterClick = () => {
-  userStore.toggleRegisterModal(true)
-}
-
-// 暴露方法给父组件使用
-defineExpose({
-  handleLoginClick,
-  handleRegisterClick
-})
 </script>

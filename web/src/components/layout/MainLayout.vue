@@ -4,10 +4,7 @@
     <!-- 头部 -->
     <el-header p-0 sticky top-0 z-[999] h-[60px] shadow-[0_1px_4px_rgba(0,21,41,0.08)] class="layout-header">
       <!-- 添加导航栏 -->
-      <Navbar
-        @login-click="handleLoginClick"
-        @register-click="handleRegisterClick"
-      />
+      <Navbar/>
     </el-header>
 
     <!-- 主体 -->
@@ -23,7 +20,7 @@
       </div>
 
       <!-- 登录 / 注册统一组件 -->
-      <AuthDialog ref="authDialogRef"/>
+      <AuthDialog/>
 
       <!-- 页面内容插槽 -->
       <slot />
@@ -34,7 +31,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import MessageAlert from '@/components/common/MessageAlert.vue'
 import Navbar from './Navbar.vue'
 import AuthDialog from '@/components/auth/AuthDialog.vue'
@@ -49,23 +45,6 @@ const props = defineProps({
     }
   },
 })
-
-// 创建 ref 来引用子组件
-const authDialogRef = ref(null)
-
-// 中转: Navbar -> AuthDialog
-const handleLoginClick = () => {
-  // 调用子组件暴露的方法
-  if (authDialogRef.value) {
-    authDialogRef.value.handleLoginClick()
-  }
-}
-const handleRegisterClick = () => {
-  // 调用子组件暴露的方法
-  if (authDialogRef.value) {
-    authDialogRef.value.handleRegisterClick()
-  }
-}
 
 // 移除消息
 const removeMessage = index => {

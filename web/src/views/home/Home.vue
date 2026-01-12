@@ -20,7 +20,7 @@
         </p>
       </div>
 
-      <HomeFeatures @navigate="handleNavigation" />
+      <Contents @navigate="handleNavigation" />
 
       <!-- 功能介绍 -->
       <div mt-60px class="features-section">
@@ -72,7 +72,6 @@
 <script setup>
 import { ref, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/store/user.js'
 import {
   Reading,
   Cpu,
@@ -81,10 +80,9 @@ import {
   UserFilled,
 } from '@element-plus/icons-vue'
 import MainLayout from '@/components/layout/MainLayout.vue'
-import HomeFeatures from './HomeFeatures.vue'
+import Contents from './Contents.vue'
 
 const router = useRouter()
-const userStore = useUserStore()
 const messages = ref([])
 
 const features = ref([

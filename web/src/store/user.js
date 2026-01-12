@@ -22,6 +22,7 @@ export const useUserStore = defineStore('user', {
     // 模态框显示状态
     isLoginModalVisible: false,
     isRegisterModalVisible: false,
+    isProfileModalVisible: false,
   }),
   getters: {
     isAuthenticated: state => !!state.token,
@@ -153,6 +154,10 @@ export const useUserStore = defineStore('user', {
 
     toggleRegisterModal(visible) {
       this.isRegisterModalVisible = visible
+    },
+    
+    toggleProfileModal(visible) {
+      this.isProfileModalVisible = visible
     },
   },
 })

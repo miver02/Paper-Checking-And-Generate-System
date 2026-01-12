@@ -1,6 +1,7 @@
 <!-- src/components/layout/Navbar.vue -->
 <template>
   <el-menu
+    h-[60px] border-none 
     class="navbar-menu"
     mode="horizontal"
     :ellipsis="false"
@@ -9,7 +10,7 @@
     active-text-color="#ffd04b"
   >
     <!-- 左侧 -->
-    <div class="navbar-left">
+    <div flex-1 class="navbar-left">
       <el-menu-item index="/">
         <el-icon><Reading /></el-icon>
         <span>论文系统</span>
@@ -17,7 +18,7 @@
     </div>
 
     <!-- 中间 -->
-    <div class="navbar-center">
+    <div flex-2 justify-center class="navbar-center">
       <el-menu-item
         v-for="item in menuList"
         :key="item.index"
@@ -31,7 +32,7 @@
     </div>
 
     <!-- 右侧 -->
-    <div class="navbar-right">
+    <div flex-1 justify-center class="navbar-right">
       <template v-if="userStore.isAuthenticated">
         <el-sub-menu index="user">
           <template #title>
@@ -85,13 +86,14 @@ const userName = computed(
   () => userStore.userInfo?.display_name || userStore.userInfo?.phone
 )
 
-//  登录注册点击事件
-const emit = defineEmits(['login-click', 'register-click'])
+// 显示登录模态框
 const handleLoginClick = () => {
-  emit('login-click')
+  userStore.toggleLoginModal(true)
 }
+
+// 显示注册模态框
 const handleRegisterClick = () => {
-  emit('register-click')
+  userStore.toggleRegisterModal(true)
 }
 
 // 退出登录成功处理
@@ -106,29 +108,10 @@ const handleLogoutClick = () => {
 </script>
 
 <style scoped>
-.navbar-menu {
-  height: 60px;
-  border: none;
-}
-
 .navbar-left,
 .navbar-center,
 .navbar-right {
   display: flex;
   align-items: center;
-}
-
-.navbar-left {
-  flex: 1;
-}
-
-.navbar-center {
-  flex: 2;
-  justify-content: center;
-}
-
-.navbar-right {
-  flex: 1;
-  justify-content: flex-end;
 }
 </style>

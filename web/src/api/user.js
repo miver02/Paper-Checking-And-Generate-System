@@ -16,11 +16,10 @@ export function register(data) {
   })
 }
 
-export function getProfile(data) {
+export function getProfile() {
   return service({
     url: '/user/profile/',
     method: 'get',
-    data,
   })
 }
 

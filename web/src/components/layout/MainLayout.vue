@@ -19,9 +19,20 @@
         />
       </div>
 
-      <!-- 登录 / 注册统一组件 -->
+      <!-- 登录 / 注册 / 个人资料统一组件 -->
       <AuthDialog/>
-
+      <!-- 个人信息模态框 -->
+      <template>
+        <el-dialog
+          v-model="profileVisible"
+          title="用户信息"
+          width="400px"
+          :show-close="true"
+        >
+          <Profile @close="handleProfileClose"/>
+        </el-dialog>
+      </template>
+    
       <!-- 页面内容插槽 -->
       <slot />
     </el-main>
@@ -32,8 +43,13 @@
 
 <script setup>
 import MessageAlert from '@/components/common/MessageAlert.vue'
-import Navbar from './Navbar.vue'
+import Navbar from '@/components/navbar/Navbar.vue'
 import AuthDialog from '@/components/auth/AuthDialog.vue'
+import Profile from '@/components/user/Profile.vue'
+import { useUserStore } from '@/store/user'
+import { computed } from 'vue'
+
+const userStore = useUserStore()
 
 // 获取消息
 const props = defineProps({
@@ -49,6 +65,17 @@ const props = defineProps({
 // 移除消息
 const removeMessage = index => {
   console.log(`移除消息: ${index}`)
+}
+
+// 个人资料模态框的显示状态
+const profileVisible = computed({
+  get: () => userStore.isProfileModalVisible,
+  set: val => userStore.toggleProfileModal(val),
+})
+
+// 处理个人资料关闭事件
+const handleProfileClose = () => {
+  userStore.toggleProfileModal(false)
 }
 </script>
 

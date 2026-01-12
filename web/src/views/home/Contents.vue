@@ -1,4 +1,4 @@
-<!-- src/views/home/HomeFeatures.vue -->
+<!-- src/views/home/Contents.vue -->
 <template>
   <div mb-  class="features-container">
     <el-row :gutter="20">

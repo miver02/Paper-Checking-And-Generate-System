@@ -13,13 +13,15 @@ PHONE_REGEX = r"^1[3-9]\d{9}$"
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=30, unique=True, null=True, blank=True)
+    username = models.CharField(
+        max_length=30, unique=True, null=True, blank=True, editable=False)
 
     phone = models.CharField(
         max_length=11, unique=True, validators=[RegexValidator(PHONE_REGEX)]
     )
 
-    email = models.EmailField(max_length=255, unique=True, null=True, blank=True)
+    email = models.EmailField(
+        max_length=255, unique=True, null=True, blank=True)
 
     display_name = models.CharField(max_length=30, null=True, blank=True)
 
@@ -36,6 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_phone_change_at = models.DateTimeField(null=True)
 
     objects = CustomUserManager()   # Django / auth / admin
     users = CustomUserManager()     # 业务层 API

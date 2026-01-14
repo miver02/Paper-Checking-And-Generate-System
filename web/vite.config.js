@@ -1,6 +1,6 @@
 // vite.config.js
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import Vue from '@vitejs/plugin-vue'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
@@ -11,65 +11,62 @@ import UnoCSS from 'unocss/vite'
 
 const pathSrc = path.resolve(__dirname, 'src')
 
-export default defineConfig({
-  plugins: [
-    Vue(),
-    UnoCSS(),
-    AutoImport({
-      // Auto import functions from Vue, e.g. ref, reactive, toRef...
-      // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
-      imports: ['vue'],
+export default defineConfig(({ mode }) => {
+  // 👇 关键：手动加载 env
+  const env = loadEnv(mode, process.cwd())
 
-      // Auto import functions from Element Plus, e.g. ElMessage, ElMessageBox... (with style)
-      // 自动导入 Element Plus 相关函数，如：ElMessage, ElMessageBox... (带样式)
-      resolvers: [
-        ElementPlusResolver(),
+  // 防御式检查（强烈推荐）
+  if (!env.VITE_BASE_SERVER_URL || !env.VITE_BASE_SERVER_PORT) {
+    throw new Error('VITE_BASE_SERVER_URL or VITE_BASE_SERVER_PORT is not defined')
+  }
 
-        // Auto import icon components
-        // 自动导入图标组件
-        IconsResolver({
-          prefix: 'Icon',
-        }),
-      ],
+  const target = `${env.VITE_BASE_SERVER_URL}:${env.VITE_BASE_SERVER_PORT}`
 
-      dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
-    }),
+  return {
+    plugins: [
+      Vue(),
+      UnoCSS(),
 
-    Components({
-      resolvers: [
-        // Auto register icon components
-        // 自动注册图标组件
-        IconsResolver({
-          prefix: 'Icon',
-          enabledCollections: ['ep'],
-        }),
-        // Auto register Element Plus components
-        // 自动导入 Element Plus 组件
-        ElementPlusResolver(),
-      ],
+      AutoImport({
+        imports: ['vue'],
+        resolvers: [
+          ElementPlusResolver(),
+          IconsResolver({ prefix: 'Icon' }),
+        ],
+        dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
+      }),
 
-      dts: path.resolve(pathSrc, 'components.d.ts'),
-    }),
+      Components({
+        resolvers: [
+          IconsResolver({
+            prefix: 'Icon',
+            enabledCollections: ['ep'],
+          }),
+          ElementPlusResolver(),
+        ],
+        dts: path.resolve(pathSrc, 'components.d.ts'),
+      }),
 
-    Icons({
-      autoInstall: true,
-    }),
+      Icons({
+        autoInstall: true,
+      }),
+    ],
 
-    // Inspect(), // 调试插件
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'), // 别名 @ 指向 src
-    },
-  },
-  server: {
-    proxy: {
-      // 代理 /api 开头的请求到 Django 后端（假设后端端口 6666）
-      '/api': {
-        target: 'http://localhost:6666',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  },
+
+    server: {
+      proxy: {
+        [env.VITE_PROXY_PATH || '/api']: {
+          target,
+          changeOrigin: true,
+          rewrite: p =>
+            p.replace(new RegExp(`^${env.VITE_PROXY_PATH || '/api'}`), ''),
+        },
+      },
+    },
+  }
 })

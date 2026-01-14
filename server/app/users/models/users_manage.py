@@ -1,7 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
 import os
-from django.utils import timezone
-
 
 # 优化头像上传路径：动态分目录，避免单目录文件过多
 def user_avatar_upload_path(instance, filename):
@@ -66,28 +64,4 @@ class CustomUserManager(BaseUserManager):
 
         return self._create_user(phone, password, **extra_fields)
 
-    def update_user_fields(self, user_id: int, **fields) -> int:
-        """
-        纯数据库层更新（不触发 save / signals / full_clean）
-        """
-        if not fields:
-            return 0
 
-        allowed_fields = {
-            "username",
-            "email",
-            "avatar",
-            "bio",
-            "is_active",
-        }
-
-        update_data = {
-            key: value
-            for key, value in fields.items()
-            if key in allowed_fields
-        }
-
-        if not update_data:
-            return 0
-
-        return self.filter(id=user_id).update(**update_data)

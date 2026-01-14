@@ -52,7 +52,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/api/user'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 
 const router = useRouter()
 const emit = defineEmits(['success'])
@@ -90,15 +90,15 @@ const handleLogin = async () => {
         ElMessage.success('登录成功')
 
         // 存 token（常见做法）
-        userStore.setToken(data.access, data.refresh, data.user || null)
+        await userStore.setToken(data.access, data.refresh, data.user || null)
 
         emit('success')
         router.push('/')
       } else {
-        ElMessage.error(res.data.message || "登录失败")
+        ElMessage.error(res.data.message || '登录失败')
       }
     } catch (err) {
-      ElMessage.error("网络问题")
+      ElMessage.error('网络问题')
     } finally {
       loading.value = false
     }

@@ -1,5 +1,6 @@
 import service from '@/utils/request'
 
+// 登录
 export function login(data) {
   return service({
     url: '/user/login/',
@@ -8,6 +9,7 @@ export function login(data) {
   })
 }
 
+// 注册
 export function register(data) {
   return service({
     url: '/user/register/',
@@ -16,6 +18,7 @@ export function register(data) {
   })
 }
 
+// 获取用户信息
 export function getProfile() {
   return service({
     url: '/user/profile/',
@@ -23,6 +26,7 @@ export function getProfile() {
   })
 }
 
+// 更新用户信息
 export function updateProfile(data) {
   return service({
     url: '/user/profile/',

@@ -5,12 +5,12 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 
 // 在应用启动时加载token
-onMounted(() => {
+onMounted(async () => {
   const userStore = useUserStore()
-  userStore.loadTokens()
+  await userStore.loadTokens()
 })
 </script>
 

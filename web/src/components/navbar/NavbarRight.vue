@@ -1,34 +1,34 @@
 <template>
-    <div flex-1 justify-center flex items-center class="navbar-right">
-      <template v-if="userStore.isAuthenticated">
-        <el-sub-menu index="user">
-          <template #title>
-            <el-icon><User /></el-icon>
-            {{ userName }}
-          </template>
+  <div flex-1 justify-center flex items-center class="navbar-right">
+    <template v-if="userStore.isAuthenticated">
+      <el-sub-menu index="user">
+        <template #title>
+          <el-icon><User /></el-icon>
+          {{ userName }}
+        </template>
 
-          <el-menu-item index="profile" @click="handleProfileClick"> 个人中心 </el-menu-item>
+        <el-menu-item index="profile" @click="handleProfileClick">
+          个人中心
+        </el-menu-item>
 
-          <el-menu-item index="logout" divided @click="handleLogoutClick">
-            退出登录
-          </el-menu-item>
-        </el-sub-menu>
-      </template>
+        <el-menu-item index="logout" divided @click="handleLogoutClick">
+          退出登录
+        </el-menu-item>
+      </el-sub-menu>
+    </template>
 
-      <template v-else>
-        <el-menu-item index="login" @click="handleLoginClick"
-          >登录</el-menu-item
-        >
-        <el-menu-item index="register" @click="handleRegisterClick"
-          >注册</el-menu-item
-        >
-      </template>
-    </div>
+    <template v-else>
+      <el-menu-item index="login" @click="handleLoginClick">登录</el-menu-item>
+      <el-menu-item index="register" @click="handleRegisterClick"
+        >注册</el-menu-item
+      >
+    </template>
+  </div>
 </template>
 
-<script setup> 
+<script setup>
 import { User } from '@element-plus/icons-vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 import { computed } from 'vue'
 import { ElMessage } from 'element-plus'
 

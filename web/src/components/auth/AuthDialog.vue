@@ -22,7 +22,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'

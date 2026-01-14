@@ -17,7 +17,9 @@ export default defineConfig(({ mode }) => {
 
   // 防御式检查（强烈推荐）
   if (!env.VITE_BASE_SERVER_URL || !env.VITE_BASE_SERVER_PORT) {
-    throw new Error('VITE_BASE_SERVER_URL or VITE_BASE_SERVER_PORT is not defined')
+    throw new Error(
+      'VITE_BASE_SERVER_URL or VITE_BASE_SERVER_PORT is not defined'
+    )
   }
 
   const target = `${env.VITE_BASE_SERVER_URL}:${env.VITE_BASE_SERVER_PORT}`
@@ -29,10 +31,7 @@ export default defineConfig(({ mode }) => {
 
       AutoImport({
         imports: ['vue'],
-        resolvers: [
-          ElementPlusResolver(),
-          IconsResolver({ prefix: 'Icon' }),
-        ],
+        resolvers: [ElementPlusResolver(), IconsResolver({ prefix: 'Icon' })],
         dts: path.resolve(pathSrc, 'auto-imports.d.ts'),
       }),
 

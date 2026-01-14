@@ -1,42 +1,25 @@
 <!-- src/views/home/Contents.vue -->
 <template>
-  <div mb-  class="features-container">
+  <div mb- class="features-container">
     <el-row :gutter="20">
-      <el-col 
-        v-for="item in features"
-        :key="item.path"
-        :span="8"
-      >
-        <el-card 
-          border-none h-full
-          class="feature-card"
-          shadow="hover"
-        >
-          <div 
-            text-center p-5
-            class="card-content"
-          >
-            <el-icon
-              mb-5
-              :size="48" 
-              :color="item.iconColor" 
-              class="card-icon"
-            >
-              <component :is="item.icon"/>
+      <el-col v-for="item in features" :key="item.path" :span="8">
+        <el-card border-none h-full class="feature-card" shadow="hover">
+          <div text-center p-5 class="card-content">
+            <el-icon mb-5 :size="48" :color="item.iconColor" class="card-icon">
+              <component :is="item.icon" />
             </el-icon>
-            <h3
-              mb-[15px] text-[1.3rem] text-[#303133]
-              class="card-title"
-            >{{ item.title }}</h3>
-            <p 
-              mb-5 text-[#606266] leading-[1.6]
-              class="card-description"
-            >{{ item.description }}</p>
-            <el-button 
+            <h3 mb-[15px] text-[1.3rem] text-[#303133] class="card-title">
+              {{ item.title }}
+            </h3>
+            <p mb-5 text-[#606266] leading-[1.6] class="card-description">
+              {{ item.description }}
+            </p>
+            <el-button
               :type="item.buttonType"
               :plain="item.plain"
               @click="navigate(item.path)"
-            >{{ item.buttonText }}</el-button>
+              >{{ item.buttonText }}</el-button
+            >
           </div>
         </el-card>
       </el-col>

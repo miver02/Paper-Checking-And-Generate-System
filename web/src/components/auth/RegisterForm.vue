@@ -61,7 +61,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '@/api/user'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -100,7 +100,7 @@ const handleRegister = async () => {
         const data = res.data.data
         ElMessage.success('注册成功')
 
-        userStore.setToken(data.access, data.refresh, data.user || null)
+        await userStore.setToken(data.access, data.refresh, data.user || null)
         emit('success')
         router.push('/')
       } else {

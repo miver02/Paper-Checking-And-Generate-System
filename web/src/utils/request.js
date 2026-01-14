@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/user/index'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_PROXY_PATH || '/api', // 后端 API 前缀

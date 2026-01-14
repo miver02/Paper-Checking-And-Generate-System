@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useUserStore } from '@/store/user'
 
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_PATH || '/api', // 后端 API 前缀
+  baseURL: import.meta.env.VITE_PROXY_PATH || '/api', // 后端 API 前缀
   timeout: import.meta.env.VITE_TIMEOUT,
 })
 

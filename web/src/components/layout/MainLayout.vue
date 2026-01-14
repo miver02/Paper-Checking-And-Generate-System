@@ -22,16 +22,16 @@
       <!-- 登录 / 注册 / 个人资料统一组件 -->
       <AuthDialog/>
       <!-- 个人信息模态框 -->
-      <template>
-        <el-dialog
-          v-model="profileVisible"
-          title="用户信息"
-          width="400px"
-          :show-close="true"
-        >
-          <Profile @close="handleProfileClose"/>
-        </el-dialog>
-      </template>
+      <!-- <template> -->
+      <el-dialog
+        v-model="profileVisible"
+        title="用户信息"
+        width="400px"
+        :show-close="true"
+      >
+        <Profile @close="handleProfileClose"/>
+      </el-dialog>
+      <!-- </template> -->
     
       <!-- 页面内容插槽 -->
       <slot />

@@ -49,3 +49,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = "users"
         ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                old = User.objects.get(pk=self.pk)
+                if old.avatar and old.avatar != self.avatar:
+                    old.avatar.delete(save=False)
+            except User.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)

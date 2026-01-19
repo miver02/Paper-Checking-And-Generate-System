@@ -1,25 +1,26 @@
 <template>
-  <el-card class="w-full max-w-md mx-auto border-none">
+  <el-card class="profile-card">
+    <!-- 顶部：头像 + 昵称 -->
     <div class="flex items-center gap-4">
-      <!-- 头像 -->
       <el-avatar
-        :size="64"
+        :size="72"
         :src="user.avatar || userStore.defaultAvatar"
-        class="shrink-0"
+        class="shadow shrink-0"
       />
 
-      <!-- 基本信息 -->
       <div class="flex-1">
-        <div class="text-[1.2rem] font-600 text-[var(--el-text-color-primary)]">
+        <div class="text-lg font-semibold text-[var(--el-text-color-primary)]">
           {{ user.display_name || '-' }}
         </div>
 
-        <div
-          v-for="item in baseInfo"
-          :key="item.label"
-          class="mt-1 text-sm text-[var(--el-text-color-regular)] ml-15 text-left"
-        >
-          {{ item.label }}：{{ item.value || '-' }}
+        <div class="mt-1 space-y-1">
+          <div
+            v-for="item in baseInfo"
+            :key="item.label"
+            class="text-sm text-[var(--el-text-color-regular)]"
+          >
+            {{ item.label }}：{{ item.value || '-' }}
+          </div>
         </div>
       </div>
     </div>
@@ -27,49 +28,84 @@
     <el-divider class="my-4" />
 
     <!-- 详细信息 -->
-    <div class="space-y-2 text-sm text-[var(--el-text-color-regular)]">
+    <div class="info-list">
       <div
         v-for="item in detailInfo"
         :key="item.label"
-        class="flex justify-between"
+        class="info-item"
       >
-        <span>{{ item.label }}</span>
-        <span>{{ item.value || '-' }}</span>
+        <span class="label">{{ item.label }}</span>
+        <span class="value">{{ item.value || '-' }}</span>
       </div>
     </div>
-  </el-card>
 
-  <!-- 按钮 -->
-  <div class="text-center mt-4">
-    <el-button type="success" round @click="goProfile"> 更改信息 </el-button>
-  </div>
+    <!-- 操作 -->
+    <div class="text-center mt-6">
+      <el-button
+        type="primary"
+        round
+        class="px-8"
+        @click="goProfile"
+      >
+        编辑资料
+      </el-button>
+    </div>
+  </el-card>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/store/user/index'
+import { useUserStore } from '@/store/user'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const user = computed(() => userStore.user)
+const user = computed(() => userStore.user || {})
 
-// 基础信息
 const baseInfo = computed(() => [
-  { label: '标识符', value: user.value.username },
+  { label: '用户标识符', value: user.value.username },
   { label: '手机号', value: user.value.phone },
 ])
-// 详细信息
+
 const detailInfo = computed(() => [
   { label: '邮箱', value: user.value.email },
   { label: '个人介绍', value: user.value.bio },
 ])
 
-// 跳转到profile页面
 const goProfile = () => {
-  router.push({
-    path: '/user/profile',
-  })
+  router.push('/user/profile')
 }
 </script>
+
+<style scoped>
+.profile-card {
+  max-width: 420px;
+  margin: 0 auto;
+  border-radius: 16px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  color: var(--el-text-color-secondary);
+}
+
+.value {
+  max-width: 60%;
+  text-align: right;
+  color: var(--el-text-color-regular);
+  word-break: break-all;
+}
+</style>
+

@@ -14,5 +14,5 @@ export default () => ({
   isProfileModalVisible: false,
 
   // 默认头像
-  defaultAvatar: '/avatar/default.png',
+  defaultAvatar: 'http://localhost:8000/static/avatars/default.png',
 })

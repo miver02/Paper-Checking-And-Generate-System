@@ -34,3 +34,21 @@ export function updateProfile(data) {
     data,
   })
 }
+
+// 更新用户铭感信息
+export function updateAuthProfile(data) {
+  return service({
+    url: '/user/authprofile/',
+    method: 'patch',
+    data,
+  })
+}
+
+// 获取用户头像URL
+export function getAvatarUrl(data) {
+  return service({
+    url: '/user/avatar/',
+    method: 'post',
+    data,
+  })
+}

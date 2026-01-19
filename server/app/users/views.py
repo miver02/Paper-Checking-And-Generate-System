@@ -89,7 +89,7 @@ class ProfileView(APIView):
         try:
             user = request.user
 
-            return res_common.get_response200("获取成功", UserBaseInfoRes(user).data)
+            return res_common.get_response200("获取成功", UserBaseInfoRes(user, context={"request": request}).data)
         except Exception as e:
             return res_common.get_response400(err=str(e))
 
@@ -123,4 +123,17 @@ class ProfileView(APIView):
             return res_common.get_response200("更新成功", UpdateUserProfileReq(user).data)
         except Exception as e:
             return res_common.get_response400(err=str(e))
-        
+
+class UploadAvatarView(APIView):
+    permission_classes = [IsAuthenticated]
+    # throttle_classes = [ApiThrottle]
+
+    def post(self, request):
+        user = request.user
+
+        if user.avatar:
+            user.avatar.delete(save=False)
+
+        user.avatar = request.FILES['avatar']
+        user.save(update_fields=['avatar'])
+        return res_common.get_response200(data={"url": user.avatar.url})

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # 'rest_framework.authtoken', # DRF默认Token
     'rest_framework_simplejwt',
+    "rest_framework_simplejwt.token_blacklist",
     'app.users', 
     'app.generate_paper',
     'app.plagiarism_check',
@@ -216,7 +217,7 @@ AUTH_USER_MODEL = "app_users.User"
 
 # JWT设置
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # access token有效期
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # access token有效期
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # refresh token有效期
     'ROTATE_REFRESH_TOKENS': True,                  # 是否轮换刷新token
     'BLACKLIST_AFTER_ROTATION': True,               # 刷新后将旧token加入黑名单
@@ -246,3 +247,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+# 手机号更换时间限制
+PHONE_CHANGE_INTERVAL = 24 * 60 * 60  # 24小时

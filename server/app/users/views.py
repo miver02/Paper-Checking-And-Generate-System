@@ -15,7 +15,7 @@ from .services import LoginService, RegisterService
 from .serializers import (
     UserBaseInfoRes, UserRegisterReq, UserLoginReq, UpdateUserProfileReq
 )
-from app.security import (
+from app.security.throttles import (
     LoginIPThrottle, RegisterThrottle, UserThrottle, ApiThrottle,
     TokenThrottle,
 )

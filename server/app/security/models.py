@@ -1,3 +1,29 @@
+from django.utils import timezone
 from django.db import models
 
-# Create your models here.
+class VerifyCode(models.Model):
+    PURPOSE_CHOICES = (
+        ('change_phone', 'Change Phone'),
+        ('change_email', 'Change Email'),
+        # ('login', 'Login'),
+        # ('register', 'Register'),
+    )
+
+    CHANNEL_CHOICES = (
+        ('sms', 'SMS'),
+        ('email', 'Email'),
+    )
+
+    target = models.CharField(max_length=255)  # phone or email
+    code = models.CharField(max_length=6)
+
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
+    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES)
+
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+

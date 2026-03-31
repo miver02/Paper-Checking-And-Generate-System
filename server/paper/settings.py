@@ -196,9 +196,10 @@ CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,
 
 CORS_ALLOW_CREDENTIALS = True
 
-# AI模型设置
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo')
+# ALIYUN AI模型设置
+BASE_URL = os.getenv('BASE_URL', "https://dashscope.aliyuncs.com/api/v1")
+ALIYUN_API_KEY = os.getenv('ALIYUN_API_KEY')
+ALIYUN_MODEL = os.getenv('ALIYUN_MODEL', 'qwen3.5-plus')
 
 # 查重API设置
 PLAGIARISM_API_KEY = os.getenv('PLAGIARISM_API_KEY')

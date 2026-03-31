@@ -19,7 +19,7 @@ class GeneratedPaper(models.Model):
     """
     # 优化1：外键字符串引用（彻底规避循环导入）+ 完善字段约束/注释
     user = models.ForeignKey(
-        to="User",  # 字符串引用：跨app需写"app_name.User"
+        "app_users.User", 
         on_delete=models.SET_NULL,
         verbose_name="关联用户",
         related_name="generated_papers",
@@ -54,6 +54,7 @@ class GeneratedPaper(models.Model):
         blank=True,
         verbose_name="中文摘要",
         help_text="生成的论文中文摘要"
+        null=True
     )
     key_words = models.TextField(
         blank=True,
@@ -126,7 +127,6 @@ class GeneratedPaper(models.Model):
         verbose_name = "论文生成记录"  # 优化：名称更精准
         verbose_name_plural = "论文生成记录"
         ordering = ["-created_at"]  # 保留：按创建时间倒序
-        app_label = "app_users"
         db_table = "generated_papers"  # 优化：表名改为复数（符合数据库规范）
         # 优化8：添加核心索引，提升查询效率
         indexes = [
@@ -181,9 +181,3 @@ class GeneratedPaper(models.Model):
             return []
         # 去除空值和空格
         return [kw.strip() for kw in key_words_field.split(";") if kw.strip()]
-    def get_status_display(self):
-        """Django 内置的choices字段显示方法（自动生成）"""
-        # 把choices转为字典，通过值找对应的标签
-        status_dict = dict(GENERATE_STATUS_CHOICES)
-        # 若值不存在，返回原始值（兼容异常情况）
-        return status_dict.get(self.status, self.status)

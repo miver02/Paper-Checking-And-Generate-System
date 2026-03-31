@@ -3,6 +3,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 # 导入本地包
 from .models import User
+from ..tools import tc
 
 
 # 登录服务
@@ -17,6 +18,9 @@ class LoginService:
         # 生成JWT token
         refresh = RefreshToken.for_user(user)
         access = AccessToken.for_user(user)
+
+        user.last_login = tc.get_nowtime()
+        user.save(update_fields=['last_login'])
         return {
             'refresh': str(refresh),
             'access': str(access),
@@ -36,6 +40,7 @@ class RegisterService:
         user = User.users.create_user(
             phone=phone,
             password=password,
+            last_login=tc.get_nowtime(),
             **kwargs
         )
         

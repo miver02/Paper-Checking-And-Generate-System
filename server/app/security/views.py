@@ -7,7 +7,7 @@ from app.users.models import User
 from app.users import res_common
 from .serializes import SendVerifyCodeSerializer, ChangeEmailSerializer, ChangePhoneSerializer
 from .services import LogoutService, VerifyCodeService
-from .utils import get_nowtime
+from ..tools import tc
 
 class SendVerifyCodeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -88,7 +88,7 @@ class ChangePhoneView(APIView):
             return res_common.get_response400(err=str(e))
 
         user.phone = phone
-        user.last_phone_change_at = get_nowtime()
+        user.last_phone_change_at = tc.get_nowtime()
         user.save(update_fields=['phone', 'last_phone_change_at'])
 
         LogoutService.blacklist_user_tokens(user)

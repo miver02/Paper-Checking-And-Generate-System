@@ -27,6 +27,3 @@ def send_email(email, code):
     """
     print(f'[EMAIL] {email} -> {code}')
     # Django send_mail / SES / SendGrid
-
-def get_nowtime():
-    return timezone.now()

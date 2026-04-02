@@ -8,7 +8,7 @@ class ResponseCommon:
     def __init__(self):
         pass
 
-    def get_response200(self, message: str = '请求成功', data: dict = None):
+    def get_response200(self, message: str = '请求成功', data: any = None):
         return Response({
             "code": status.HTTP_200_OK,
             "message": message,

@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
-# 本地导入
-from .models import GeneratedPaper
 
-class GeneratedPaperSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GeneratedPaper
-        fields = "__all__"
+class GenerateAbstractSerializer(serializers.Serializer):
+    requirements = serializers.CharField(required=True)
+    title = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    template_abstract = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
+class RefactorAbstractSerializer(GenerateAbstractSerializer):
+    old_abstract = serializers.CharField(required=True)

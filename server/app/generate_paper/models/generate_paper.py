@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MaxLengthValidator
@@ -19,8 +20,8 @@ class GeneratedPaper(models.Model):
     """
     # 优化1：外键字符串引用（彻底规避循环导入）+ 完善字段约束/注释
     user = models.ForeignKey(
-        "app_users.User", 
-        on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         verbose_name="关联用户",
         related_name="generated_papers",
         null=True,
@@ -48,52 +49,63 @@ class GeneratedPaper(models.Model):
         help_text="论文生成所用的模板文本，为空时使用系统默认模板"
     )
 
-    # 优化4：摘要/关键词字段分组+注释，提升可读性
-    # 中文摘要及关键词
+    # 中文摘要
     abstract = models.TextField(
         blank=True,
         verbose_name="中文摘要",
         help_text="生成的论文中文摘要"
-        null=True
-    )
-    key_words = models.TextField(
-        blank=True,
-        verbose_name="中文关键词",
-        help_text="生成的论文中文关键词（建议用分号分隔）"
     )
 
-    # 英文摘要及关键词
+    # 中文关键词（改为 JSON）
+    key_words = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="中文关键词",
+        help_text="中文关键词列表，如 ['AI', '深度学习']"
+    )
+
+    # 英文摘要
     abstract_en = models.TextField(
         blank=True,
         verbose_name="英文摘要",
         help_text="生成的论文英文摘要"
     )
-    key_words_en = models.TextField(
+
+    # 英文关键词（改为 JSON）
+    key_words_en = models.JSONField(
         blank=True,
+        default=list,
         verbose_name="英文关键词",
-        help_text="生成的论文英文关键词（建议用分号分隔）"
+        help_text="英文关键词列表"
     )
 
-    # 优化5：正文相关字段补充注释，统一命名规范
+    # 正文
     content = models.TextField(
         blank=True,
         verbose_name="论文正文",
         help_text="生成的论文完整正文内容"
     )
+
+    # 总结
     summary = models.TextField(
         blank=True,
         verbose_name="论文总结",
         help_text="论文核心结论与总结"
     )
+
+    # 致谢
     thank_words = models.TextField(
         blank=True,
         verbose_name="致谢语",
         help_text="论文致谢部分内容"
     )
-    literature = models.TextField(
+
+    # 参考文献（JSON 正确写法）
+    literature = models.JSONField(
         blank=True,
+        default=list,
         verbose_name="参考文献",
-        help_text="生成的论文参考文献列表"
+        help_text="参考文献列表（结构化数据）"
     )
 
     # 优化6：状态字段使用常量+补充注释

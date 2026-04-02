@@ -2,11 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from .utils import res_common
-from ..tools import AIToolClass
 from .services import aisv
+from .serializer import GenerateAbstractSerializer, RefactorAbstractSerializer
 
 
-aitc = AIToolClass()
+
 
 class GeneratePaperView(APIView):
     permission_classes = [IsAuthenticated]
@@ -18,16 +18,22 @@ class GenerateAbstractView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        abstract_text = request.data.get('abstract', None)  # 默认值为None
+        serializer = GenerateAbstractSerializer(data=request.data)
+        if not serializer.is_valid():
+            return res_common.get_response400(message=serializer.errors)
 
-        if abstract_text is not None and not isinstance(abstract_text, str):
-            return res_common.get_response400(message="Abstract must be a string or None.")
+        return res_common.get_response200(
+            data=aisv.generate_abstract(**serializer.validated_data)
+        )
 
-        if abstract_text is None:
-            return res_common.get_response200(message="Abstract is None.")
-        
+    def patch(self, request):
+        serializer = RefactorAbstractSerializer(data=request.data)
+        if not serializer.is_valid():
+            return res_common.get_response400(message=serializer.errors)
 
-        return res_common.get_response200(data=aitc.get_ai_response(aisv.generate_abstract(abstract_text)))
+        return res_common.get_response200(
+            data=aisv.refactor_abstract(**serializer.validated_data)
+        )
 
 
 class GenerateSummaryView(APIView):

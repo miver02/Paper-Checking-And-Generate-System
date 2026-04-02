@@ -24,6 +24,11 @@ class VerifyCode(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
+    class Meta:
+            verbose_name = "验证码记录"  
+            verbose_name_plural = "验证码记录"
+            ordering = ["-created_at"]  # 保留：按创建时间倒序
+            db_table = "security_verify_code"  
     def is_expired(self):
         return timezone.now() > self.expires_at
 

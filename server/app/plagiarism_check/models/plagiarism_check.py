@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
+
+
 
 # 抽离常量：提升可维护性，便于全局复用
 PLAGIARISM_STATUS_CHOICES = (
@@ -20,8 +23,8 @@ class PlagiarismCheck(models.Model):
 
     # 优化1：外键字符串引用（避免循环导入）+ 完善字段注释/约束
     user = models.ForeignKey(
-        to="User",  # 推荐：字符串引用，彻底规避循环导入（跨app需写"app_name.User"）
-        on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         verbose_name="关联用户",
         related_name="plagiarism_checks",
         null=True,
@@ -103,7 +106,6 @@ class PlagiarismCheck(models.Model):
         verbose_name = "查重检测记录"  
         verbose_name_plural = "查重检测记录"
         ordering = ["-created_at"]  # 保留：按创建时间倒序
-        app_label = "app_users"
         db_table = "plagiarism_checks"  
         # 优化9：添加核心索引，提升查询效率
         indexes = [

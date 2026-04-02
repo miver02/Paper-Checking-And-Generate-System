@@ -38,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_phone_change_at = models.DateTimeField(null=True)
+    last_phone_change_at = models.DateTimeField(blank=True, null=True)
 
     objects = CustomUserManager()   # Django / auth / admin
     users = CustomUserManager()     # 业务层 API

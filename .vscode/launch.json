@@ -1,0 +1,44 @@
+{
+    // 使用 IntelliSense 了解相关属性。
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Backend: Debug Django",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "${workspaceFolder}/server/.venv/bin/python",
+            "program": "${workspaceFolder}/server/manage.py",
+            "args": [
+                "runserver",
+                "--noreload",
+                "--nothreading"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/server",
+                "DJANGO_SETTINGS_MODULE": "paper.settings",
+            },
+            "justMyCode": true,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/server"
+        },
+        {
+            "name": "Frontend: Vite Dev Server",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/web"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full Stack: Django + Vite",
+            "configurations": [
+                "Backend: Debug Django",
+                "Frontend: Vite Dev Server"
+            ],
+            "stopAll": true
+        }
+    ]
+}

@@ -13,8 +13,7 @@ class AIService:
         zh_abstract = self.aitc.get_ai_generate(self.ai_prompt.abstract_prompt(
             requirements, title=title, template_abstract=template_abstract))
 
-        en_abstract = self.aitc.get_ai_translation(
-            self.ai_prompt.translation_prompt(zh_abstract))
+        en_abstract = self.aitc.get_ai_translation(zh_abstract)
 
         # 写数据库
 
@@ -76,8 +75,7 @@ class AIService:
         zh_abstract = self.aitc.get_ai_generate(self.ai_prompt.abstract_prompt(
             requirements, old_abstract, title, template_abstract))
 
-        en_abstract = self.aitc.get_ai_translation(
-            self.ai_prompt.translation_prompt(zh_abstract))
+        en_abstract = self.aitc.get_ai_translation(zh_abstract)
 
         # 写入数据库
         

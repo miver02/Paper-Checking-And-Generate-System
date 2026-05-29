@@ -29,5 +29,12 @@ class ResponseCommon:
             'data': {}
         })
 
+    def get_response502(self, message: str):
+        return Response({
+            'code': status.HTTP_502_BAD_GATEWAY,
+            'message': message,
+            'data': {}
+        }, status=status.HTTP_502_BAD_GATEWAY)
+
 
 res_common = ResponseCommon()

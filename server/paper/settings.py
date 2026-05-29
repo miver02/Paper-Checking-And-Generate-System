@@ -199,7 +199,7 @@ CORS_ALLOW_CREDENTIALS = True
 # ALIYUN AI模型设置
 BASE_URL = os.getenv('BASE_URL', "https://dashscope.aliyuncs.com/api/v1")
 ALIYUN_API_KEY = os.getenv('ALIYUN_API_KEY')
-ALIYUN_MODEL = os.getenv('ALIYUN_MODEL', 'qwen3.5-plus')
+ALIYUN_MODEL = os.getenv('ALIYUN_MODEL', 'deepseek-v4-flash')
 
 # 查重API设置
 PLAGIARISM_API_KEY = os.getenv('PLAGIARISM_API_KEY')

@@ -12,6 +12,7 @@ load_dotenv('./.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+TESTING = os.getenv('DJANGO_TESTING', '0') == '1'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
@@ -73,7 +74,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'paper.wsgi.application'
 
 # Database
-if os.getenv('DB_ENGINE') == 'mysql':
+if not TESTING and os.getenv('DB_ENGINE') == 'mysql':
     # mysql 配置
     DATABASES = {
         'default': {
@@ -190,6 +191,9 @@ REST_FRAMEWORK = {
         'user': '1000/day'
     }
 }
+
+if TESTING:
+    REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = []
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")

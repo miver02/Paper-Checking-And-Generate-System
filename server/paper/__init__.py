@@ -31,5 +31,6 @@ def create_media_directory():
         print(f"Failed to create media directory: {e}")
 
 
-create_database()
+if settings.DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
+    create_database()
 create_media_directory()

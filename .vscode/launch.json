@@ -36,7 +36,7 @@
             "name": "Full Stack: Django + Vite",
             "configurations": [
                 "Backend: Debug Django",
-                "Frontend: Vite Dev Server"
+                "Frontend: Vite Dev Server",
             ],
             "stopAll": true
         }

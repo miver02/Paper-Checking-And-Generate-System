@@ -14,6 +14,7 @@ class AIService:
         self.aitc = AIToolClass()
         self.ai_prompt = ai_prompt
 
+    # 解析参考文献
     def _parse_reference_list(self, text: str):
         try:
             parsed = json.loads(text)
@@ -24,7 +25,9 @@ class AIService:
             return parsed
 
         if isinstance(parsed, dict):
-            references = parsed.get("references") or parsed.get("items") or parsed.get("data")
+            references = (
+                parsed.get("references") or parsed.get("items") or parsed.get("data")
+            )
             if isinstance(references, list):
                 return references
             if isinstance(references, str) and references:
@@ -35,13 +38,25 @@ class AIService:
 
         return [text] if text else []
 
+    # 构建模板文本
     def _build_template_text(self, **templates):
-        payload = {key: value for key, value in templates.items() if value not in (None, "")}
+        payload = {
+            key: value for key, value in templates.items() if value not in (None, "")
+        }
         if not payload:
             return ""
         return json.dumps(payload, ensure_ascii=False)
 
-    def _resolve_paper(self, paper_id=None, user=None, topic=None, requirements=None, title=None, template_text=None):
+    # 获取paper记录并更新字段 不存在则创建记录
+    def _resolve_paper(
+        self,
+        paper_id=None,
+        user=None,
+        topic=None,
+        requirements=None,
+        title=None,
+        template_text=None,
+    ):
         paper = None
         if paper_id is not None:
             try:
@@ -49,7 +64,11 @@ class AIService:
             except GeneratedPaper.DoesNotExist as exc:
                 raise NotFound("Paper record not found") from exc
 
-        if paper is not None and user is not None and paper.user_id not in (None, user.id):
+        if (
+            paper is not None
+            and user is not None
+            and paper.user_id not in (None, user.id)
+        ):
             raise PermissionDenied("Paper record does not belong to current user")
 
         if paper is None:
@@ -79,6 +98,7 @@ class AIService:
             paper.save()
         return paper
 
+    # 更新1+个字段
     def _persist_paper(self, paper, status=None, **fields):
         for key, value in fields.items():
             if value is not None:
@@ -88,6 +108,7 @@ class AIService:
         paper.save()
         return paper
 
+    # 重新生成指定字段
     def _refactor_text_section(
         self,
         *,
@@ -263,7 +284,15 @@ class AIService:
                 "requirements": requirements,
             }
 
-    def generate_abstract(self, requirements, title=None, template_abstract=None, paper_id=None, user=None, paper=None):
+    def generate_abstract(
+        self,
+        requirements,
+        title=None,
+        template_abstract=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         if paper is None:
             paper = self._resolve_paper(
                 paper_id=paper_id,
@@ -273,8 +302,11 @@ class AIService:
                 template_text=self._build_template_text(abstract=template_abstract),
             )
 
-        zh_abstract = self.aitc.get_ai_generate(self.ai_prompt.abstract_prompt(
-            requirements, title=title, template_abstract=template_abstract))
+        zh_abstract = self.aitc.get_ai_generate(
+            self.ai_prompt.abstract_prompt(
+                requirements, title=title, template_abstract=template_abstract
+            )
+        )
 
         en_abstract = self.aitc.get_ai_translation(zh_abstract)
 
@@ -289,10 +321,18 @@ class AIService:
             "paper_id": paper.id,
             "status": paper.status,
             "abstract_zh": zh_abstract,
-            "abstract_en": en_abstract
+            "abstract_en": en_abstract,
         }
 
-    def generate_body(self, requirements, title=None, template_body=None, paper_id=None, user=None, paper=None):
+    def generate_body(
+        self,
+        requirements,
+        title=None,
+        template_body=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         if paper is None:
             paper = self._resolve_paper(
                 paper_id=paper_id,
@@ -302,8 +342,11 @@ class AIService:
                 template_text=self._build_template_text(body=template_body),
             )
 
-        content = self.aitc.get_ai_generate(self.ai_prompt.body_prompt(
-            requirements, title=title, template_body=template_body))
+        content = self.aitc.get_ai_generate(
+            self.ai_prompt.body_prompt(
+                requirements, title=title, template_body=template_body
+            )
+        )
 
         self._persist_paper(
             paper,
@@ -317,7 +360,15 @@ class AIService:
             "content": content,
         }
 
-    def generate_summary(self, requirements, title=None, template_summary=None, paper_id=None, user=None, paper=None):
+    def generate_summary(
+        self,
+        requirements,
+        title=None,
+        template_summary=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         if paper is None:
             paper = self._resolve_paper(
                 paper_id=paper_id,
@@ -327,8 +378,11 @@ class AIService:
                 template_text=self._build_template_text(summary=template_summary),
             )
 
-        summary = self.aitc.get_ai_generate(self.ai_prompt.summary_prompt(
-            requirements, title=title, template_summary=template_summary))
+        summary = self.aitc.get_ai_generate(
+            self.ai_prompt.summary_prompt(
+                requirements, title=title, template_summary=template_summary
+            )
+        )
 
         self._persist_paper(
             paper,
@@ -342,18 +396,33 @@ class AIService:
             "summary": summary,
         }
 
-    def generate_acknowledgement(self, requirements, title=None, template_acknowledgement=None, paper_id=None, user=None, paper=None):
+    def generate_acknowledgement(
+        self,
+        requirements,
+        title=None,
+        template_acknowledgement=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         if paper is None:
             paper = self._resolve_paper(
                 paper_id=paper_id,
                 user=user,
                 title=title,
                 requirements=requirements,
-                template_text=self._build_template_text(acknowledgement=template_acknowledgement),
+                template_text=self._build_template_text(
+                    acknowledgement=template_acknowledgement
+                ),
             )
 
-        thank_words = self.aitc.get_ai_generate(self.ai_prompt.acknowledgement_prompt(
-            requirements, title=title, template_acknowledgement=template_acknowledgement))
+        thank_words = self.aitc.get_ai_generate(
+            self.ai_prompt.acknowledgement_prompt(
+                requirements,
+                title=title,
+                template_acknowledgement=template_acknowledgement,
+            )
+        )
 
         self._persist_paper(
             paper,
@@ -367,7 +436,15 @@ class AIService:
             "thank_words": thank_words,
         }
 
-    def generate_reference(self, requirements, title=None, template_reference=None, paper_id=None, user=None, paper=None):
+    def generate_reference(
+        self,
+        requirements,
+        title=None,
+        template_reference=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         if paper is None:
             paper = self._resolve_paper(
                 paper_id=paper_id,
@@ -377,8 +454,11 @@ class AIService:
                 template_text=self._build_template_text(reference=template_reference),
             )
 
-        literature_text = self.aitc.get_ai_generate(self.ai_prompt.reference_prompt(
-            requirements, title=title, template_reference=template_reference))
+        literature_text = self.aitc.get_ai_generate(
+            self.ai_prompt.reference_prompt(
+                requirements, title=title, template_reference=template_reference
+            )
+        )
 
         literature = self._parse_reference_list(literature_text)
         self._persist_paper(
@@ -393,18 +473,32 @@ class AIService:
             "literature": literature,
         }
 
-    def refactor_abstract(self, requirements, old_abstract, title=None, template_abstract=None, paper_id=None, user=None):
+    def refactor_abstract(
+        self,
+        requirements,
+        old_abstract,
+        title=None,
+        template_abstract=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         with transaction.atomic():
-            paper = self._resolve_paper(
-                paper_id=paper_id,
-                user=user,
-                title=title,
-                requirements=requirements,
-                template_text=self._build_template_text(abstract=template_abstract),
-            )
 
-            zh_abstract = self.aitc.get_ai_generate(self.ai_prompt.abstract_prompt(
-                requirements, old_abstract, title, template_abstract))
+            if paper is None:
+                paper = self._resolve_paper(
+                    paper_id=paper_id,
+                    user=user,
+                    title=title,
+                    requirements=requirements,
+                    template_text=self._build_template_text(abstract=template_abstract),
+                )
+
+            zh_abstract = self.aitc.get_ai_generate(
+                self.ai_prompt.abstract_refactor_prompt(
+                    requirements, old_abstract, title, template_abstract
+                )
+            )
 
             en_abstract = self.aitc.get_ai_translation(zh_abstract)
 
@@ -419,10 +513,19 @@ class AIService:
                 "paper_id": paper.id,
                 "status": paper.status,
                 "abstract_zh": zh_abstract,
-                "abstract_en": en_abstract
+                "abstract_en": en_abstract,
             }
 
-    def refactor_body(self, requirements, old_body, title=None, template_body=None, paper_id=None, user=None, paper=None):
+    def refactor_body(
+        self,
+        requirements,
+        old_body,
+        title=None,
+        template_body=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         return self._refactor_text_section(
             requirements=requirements,
             old_content=old_body,
@@ -437,7 +540,16 @@ class AIService:
             paper=paper,
         )
 
-    def refactor_summary(self, requirements, old_summary, title=None, template_summary=None, paper_id=None, user=None, paper=None):
+    def refactor_summary(
+        self,
+        requirements,
+        old_summary,
+        title=None,
+        template_summary=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         return self._refactor_text_section(
             requirements=requirements,
             old_content=old_summary,
@@ -452,7 +564,16 @@ class AIService:
             paper=paper,
         )
 
-    def refactor_acknowledgement(self, requirements, old_acknowledgement, title=None, template_acknowledgement=None, paper_id=None, user=None, paper=None):
+    def refactor_acknowledgement(
+        self,
+        requirements,
+        old_acknowledgement,
+        title=None,
+        template_acknowledgement=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         return self._refactor_text_section(
             requirements=requirements,
             old_content=old_acknowledgement,
@@ -467,7 +588,16 @@ class AIService:
             paper=paper,
         )
 
-    def refactor_reference(self, requirements, old_reference, title=None, template_reference=None, paper_id=None, user=None, paper=None):
+    def refactor_reference(
+        self,
+        requirements,
+        old_reference,
+        title=None,
+        template_reference=None,
+        paper_id=None,
+        user=None,
+        paper=None,
+    ):
         return self._refactor_reference_section(
             requirements=requirements,
             old_reference=old_reference,

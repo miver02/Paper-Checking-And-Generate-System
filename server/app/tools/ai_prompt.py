@@ -21,7 +21,7 @@ class Prompt:
                     - Do NOT change the structure
 
                     Output ONLY the final translated text.
-                """
+                """,
             },
             {
                 "role": "user",
@@ -30,11 +30,13 @@ class Prompt:
                     {text}
 
                     Translate into professional English.
-                """
-            }
+                """,
+            },
         ]
 
-    def _section_prompt(self, section_name: str, requirements, title=None, template=None) -> list:
+    def _section_prompt(
+        self, section_name: str, requirements, title=None, template=None
+    ) -> list:
         return [
             {
                 "role": "system",
@@ -57,7 +59,7 @@ class Prompt:
                     8. Keep logical consistency and avoid repetition
 
                     Output ONLY the final {section_name}.
-                """
+                """,
             },
             {
                 "role": "user",
@@ -72,52 +74,13 @@ class Prompt:
                     {template or ""}
 
                     Generate the {section_name} now.
-                """
-            }
+                """,
+            },
         ]
 
-    def abstract_prompt(self, requirements, old_abstract=None, title=None, template_abstract=None) -> list:
-        if old_abstract is not None:
-            return [
-                {
-                    "role": "system",
-                    "content": """
-                        You are a strict reviewer.
-
-                        Check the summary against:
-                        1. Template structure compliance
-                        2. Requirement satisfaction
-                        3. Clarity and conciseness
-                        4. No hallucination
-
-                        If the summary is PERFECT:
-                        -> Return it unchanged
-
-                        If NOT:
-                        -> Rewrite a corrected version
-
-                        Output ONLY the final corrected summary.
-                    """
-                },
-                {
-                    "role": "user",
-                    "content": f"""
-                        Requirements:
-                        {requirements}
-
-                        Template:
-                        {template_abstract or ""}
-
-                        Title:
-                        {title or ""}
-
-                        Summary:
-                        {old_abstract}
-                    """
-                }
-            ]
-
-    def _refactor_text_prompt(self, section_name: str, requirements, old_content, title=None, template=None) -> list:
+    def _refactor_text_prompt(
+        self, section_name: str, requirements, old_content, title=None, template=None
+    ) -> list:
         return [
             {
                 "role": "system",
@@ -137,7 +100,7 @@ class Prompt:
                     -> Rewrite a corrected version
 
                     Output ONLY the final corrected {section_name}.
-                """
+                """,
             },
             {
                 "role": "user",
@@ -153,63 +116,53 @@ class Prompt:
 
                     Original {section_name.capitalize()}:
                     {old_content}
-                """
-            }
-        ]
-        return [
-            {
-                "role": "system",
-                "content": """
-                    You are a senior summarization engine.
-
-                    Your task is to generate a structured summary based on:
-                    - Requirements
-                    - Title
-                    - Template
-
-                    Strict Rules:
-                    1. Output MUST strictly follow the template structure
-                    2. Do NOT add extra sections or explanations
-                    3. Do NOT omit any required sections
-                    4. Use concise, clear, and professional language
-                    5. Do NOT hallucinate or invent information
-                    6. If content is insufficient, keep sections brief instead of guessing
-                    7. Match the language of the Requirements (e.g. Chinese -> Chinese, English -> English)
-                    8. Keep logical consistency and avoid repetition
-
-                    Output ONLY the final summary.
-                """
+                """,
             },
-            {
-                "role": "user",
-                "content": f"""
-                    [Requirements]
-                    {requirements}
-
-                    [Title]
-                    {title or ""}
-
-                    [Template]
-                    {template_abstract or ""}
-
-                    Generate the summary now.
-                """
-            }
         ]
+
+    def abstract_prompt(self, requirements, title=None, template_abstract=None) -> list:
+        return self._section_prompt(
+            "abstract", requirements, title=title, template=template_abstract
+        )
+
+    def abstract_refactor_prompt(
+        self, requirements, old_abstract, title=None, template_abstract=None
+    ) -> list:
+        return self._refactor_text_prompt(
+            "abstract",
+            requirements,
+            old_abstract,
+            title=title,
+            template=template_abstract,
+        )
 
     def body_prompt(self, requirements, title=None, template_body=None) -> list:
-        return self._section_prompt("body", requirements, title=title, template=template_body)
+        return self._section_prompt(
+            "body", requirements, title=title, template=template_body
+        )
 
-    def body_refactor_prompt(self, requirements, old_body, title=None, template_body=None) -> list:
-        return self._refactor_text_prompt("body", requirements, old_body, title=title, template=template_body)
+    def body_refactor_prompt(
+        self, requirements, old_body, title=None, template_body=None
+    ) -> list:
+        return self._refactor_text_prompt(
+            "body", requirements, old_body, title=title, template=template_body
+        )
 
     def summary_prompt(self, requirements, title=None, template_summary=None) -> list:
-        return self._section_prompt("summary", requirements, title=title, template=template_summary)
+        return self._section_prompt(
+            "summary", requirements, title=title, template=template_summary
+        )
 
-    def summary_refactor_prompt(self, requirements, old_summary, title=None, template_summary=None) -> list:
-        return self._refactor_text_prompt("summary", requirements, old_summary, title=title, template=template_summary)
+    def summary_refactor_prompt(
+        self, requirements, old_summary, title=None, template_summary=None
+    ) -> list:
+        return self._refactor_text_prompt(
+            "summary", requirements, old_summary, title=title, template=template_summary
+        )
 
-    def acknowledgement_prompt(self, requirements, title=None, template_acknowledgement=None) -> list:
+    def acknowledgement_prompt(
+        self, requirements, title=None, template_acknowledgement=None
+    ) -> list:
         return self._section_prompt(
             "acknowledgement",
             requirements,
@@ -217,7 +170,13 @@ class Prompt:
             template=template_acknowledgement,
         )
 
-    def acknowledgement_refactor_prompt(self, requirements, old_acknowledgement, title=None, template_acknowledgement=None) -> list:
+    def acknowledgement_refactor_prompt(
+        self,
+        requirements,
+        old_acknowledgement,
+        title=None,
+        template_acknowledgement=None,
+    ) -> list:
         return self._refactor_text_prompt(
             "acknowledgement",
             requirements,
@@ -226,7 +185,9 @@ class Prompt:
             template=template_acknowledgement,
         )
 
-    def reference_prompt(self, requirements, title=None, template_reference=None) -> list:
+    def reference_prompt(
+        self, requirements, title=None, template_reference=None
+    ) -> list:
         return [
             {
                 "role": "system",
@@ -246,7 +207,7 @@ class Prompt:
                     5. If reliable references cannot be inferred, return an empty array
 
                     Output ONLY the final JSON array.
-                """
+                """,
             },
             {
                 "role": "user",
@@ -261,11 +222,13 @@ class Prompt:
                     {template_reference or ""}
 
                     Generate the reference list now.
-                """
-            }
+                """,
+            },
         ]
 
-    def reference_refactor_prompt(self, requirements, old_reference, title=None, template_reference=None) -> list:
+    def reference_refactor_prompt(
+        self, requirements, old_reference, title=None, template_reference=None
+    ) -> list:
         return [
             {
                 "role": "system",
@@ -290,7 +253,7 @@ class Prompt:
                     - Do NOT add explanations, markdown, or code fences
 
                     Output ONLY the final JSON array.
-                """
+                """,
             },
             {
                 "role": "user",
@@ -306,8 +269,8 @@ class Prompt:
 
                     Original Reference List:
                     {old_reference}
-                """
-            }
+                """,
+            },
         ]
 
 

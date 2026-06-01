@@ -29,6 +29,20 @@ class ResponseCommon:
             'data': {}
         })
 
+    def get_response403(self, message: str):
+        return Response({
+            'code': status.HTTP_403_FORBIDDEN,
+            'message': message,
+            'data': {}
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    def get_response404(self, message: str):
+        return Response({
+            'code': status.HTTP_404_NOT_FOUND,
+            'message': message,
+            'data': {}
+        }, status=status.HTTP_404_NOT_FOUND)
+
     def get_response502(self, message: str):
         return Response({
             'code': status.HTTP_502_BAD_GATEWAY,

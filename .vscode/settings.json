@@ -10,6 +10,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": ["source.fixAll.eslint"],
+  "debug.javascript.autoAttachFilter": "disabled",
 
   "python.formatting.provider": "black", // 或 "autopep8", "yapf"
   "editor.formatOnType": true,

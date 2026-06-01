@@ -1,7 +1,6 @@
 import json
 
 from django.db import transaction
-from rest_framework.exceptions import NotFound, PermissionDenied
 
 from .models import GeneratedPaper
 from ..tools.ai import AIServiceError
@@ -47,56 +46,21 @@ class AIService:
             return ""
         return json.dumps(payload, ensure_ascii=False)
 
-    # 获取paper记录并更新字段 不存在则创建记录
-    def _resolve_paper(
+    # 创建新的paper记录
+    def _create_paper_record(
         self,
-        paper_id=None,
         user=None,
         topic=None,
         requirements=None,
         title=None,
         template_text=None,
     ):
-        paper = None
-        if paper_id is not None:
-            try:
-                paper = GeneratedPaper.objects.get(pk=paper_id)
-            except GeneratedPaper.DoesNotExist as exc:
-                raise NotFound("Paper record not found") from exc
-
-        if (
-            paper is not None
-            and user is not None
-            and paper.user_id not in (None, user.id)
-        ):
-            raise PermissionDenied("Paper record does not belong to current user")
-
-        if paper is None:
-            return GeneratedPaper.objects.create(
-                user=user if getattr(user, "is_authenticated", False) else None,
-                title=title or topic or "",
-                requirements=requirements or "",
-                template=template_text or "",
-            )
-
-        updated = False
-        if user is not None and paper.user_id is None:
-            paper.user = user
-            updated = True
-        if title or topic:
-            new_title = title or topic or ""
-            if paper.title != new_title:
-                paper.title = new_title
-                updated = True
-        if requirements and paper.requirements != requirements:
-            paper.requirements = requirements
-            updated = True
-        if template_text and paper.template != template_text:
-            paper.template = template_text
-            updated = True
-        if updated:
-            paper.save()
-        return paper
+        return GeneratedPaper.objects.create(
+            user=user if getattr(user, "is_authenticated", False) else None,
+            title=title or topic or "",
+            requirements=requirements or "",
+            template=template_text or "",
+        )
 
     # 更新1+个字段
     def _persist_paper(self, paper, status=None, **fields):
@@ -126,8 +90,7 @@ class AIService:
     ):
         with transaction.atomic():
             if paper is None:
-                paper = self._resolve_paper(
-                    paper_id=paper_id,
+                paper = self._create_paper_record(
                     user=user,
                     title=title,
                     requirements=requirements,
@@ -168,8 +131,7 @@ class AIService:
     ):
         with transaction.atomic():
             if paper is None:
-                paper = self._resolve_paper(
-                    paper_id=paper_id,
+                paper = self._create_paper_record(
                     user=user,
                     title=title,
                     requirements=requirements,
@@ -220,8 +182,7 @@ class AIService:
                 acknowledgement=template_acknowledgement,
                 reference=template_reference,
             )
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 topic=topic,
                 requirements=requirements,
@@ -294,8 +255,7 @@ class AIService:
         paper=None,
     ):
         if paper is None:
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 title=title,
                 requirements=requirements,
@@ -334,8 +294,7 @@ class AIService:
         paper=None,
     ):
         if paper is None:
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 title=title,
                 requirements=requirements,
@@ -370,8 +329,7 @@ class AIService:
         paper=None,
     ):
         if paper is None:
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 title=title,
                 requirements=requirements,
@@ -406,8 +364,7 @@ class AIService:
         paper=None,
     ):
         if paper is None:
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 title=title,
                 requirements=requirements,
@@ -446,8 +403,7 @@ class AIService:
         paper=None,
     ):
         if paper is None:
-            paper = self._resolve_paper(
-                paper_id=paper_id,
+            paper = self._create_paper_record(
                 user=user,
                 title=title,
                 requirements=requirements,
@@ -486,8 +442,7 @@ class AIService:
         with transaction.atomic():
 
             if paper is None:
-                paper = self._resolve_paper(
-                    paper_id=paper_id,
+                paper = self._create_paper_record(
                     user=user,
                     title=title,
                     requirements=requirements,

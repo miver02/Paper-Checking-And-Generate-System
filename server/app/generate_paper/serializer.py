@@ -2,7 +2,11 @@ from rest_framework import serializers
 
 
 class _BaseGenerateSerializer(serializers.Serializer):
-    paper_id = serializers.IntegerField(required=False)
+    paper_id = serializers.IntegerField(
+        required=False,
+        help_text="Deprecated: kept for backward compatibility only. The backend ignores it when creating or refactoring papers.",
+        style={"deprecated": True},
+    )
     requirements = serializers.CharField(required=True)
     title = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 

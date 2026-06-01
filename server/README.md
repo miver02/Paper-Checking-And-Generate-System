@@ -181,6 +181,12 @@ CELERY_BROKER_URL = os.getenv('REDIS_URL')
 - `CreatePaperSerializer`: 论文创建请求
 - `CreatePlagiarismCheckSerializer`: 查重创建请求
 
+**兼容性说明**:
+
+- `paper_id` 在论文生成/重构接口中仅保留为向后兼容字段
+- 服务端不会把它当作“要更新的旧记录 ID”
+- 每次 `generate_*` 和 `refactor_*` 调用都会创建新的 `GeneratedPaper`
+
 **实现重点**:
 
 - 字段验证规则

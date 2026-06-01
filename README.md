@@ -122,6 +122,7 @@ python manage.py runserver
 ```bash
 # 创建并生成论文
 POST /api/papers/create_and_generate/
+# 不需要 `paper_id`，服务端会自动创建新记录
 {
     "title": "论文标题",
     "topic_id": 1,

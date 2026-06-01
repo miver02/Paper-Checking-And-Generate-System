@@ -78,62 +78,9 @@ class Prompt:
             },
         ]
 
-    def _refactor_text_prompt(
-        self, section_name: str, requirements, old_content, title=None, template=None
-    ) -> list:
-        return [
-            {
-                "role": "system",
-                "content": f"""
-                    You are a strict reviewer.
-
-                    Check the {section_name} against:
-                    1. Template structure compliance
-                    2. Requirement satisfaction
-                    3. Clarity and conciseness
-                    4. No hallucination
-
-                    If the {section_name} is PERFECT:
-                    -> Return it unchanged
-
-                    If NOT:
-                    -> Rewrite a corrected version
-
-                    Output ONLY the final corrected {section_name}.
-                """,
-            },
-            {
-                "role": "user",
-                "content": f"""
-                    Requirements:
-                    {requirements}
-
-                    Template:
-                    {template or ""}
-
-                    Title:
-                    {title or ""}
-
-                    Original {section_name.capitalize()}:
-                    {old_content}
-                """,
-            },
-        ]
-
     def abstract_prompt(self, requirements, title=None, template_abstract=None) -> list:
         return self._section_prompt(
             "abstract", requirements, title=title, template=template_abstract
-        )
-
-    def abstract_refactor_prompt(
-        self, requirements, old_abstract, title=None, template_abstract=None
-    ) -> list:
-        return self._refactor_text_prompt(
-            "abstract",
-            requirements,
-            old_abstract,
-            title=title,
-            template=template_abstract,
         )
 
     def body_prompt(self, requirements, title=None, template_body=None) -> list:
@@ -141,23 +88,9 @@ class Prompt:
             "body", requirements, title=title, template=template_body
         )
 
-    def body_refactor_prompt(
-        self, requirements, old_body, title=None, template_body=None
-    ) -> list:
-        return self._refactor_text_prompt(
-            "body", requirements, old_body, title=title, template=template_body
-        )
-
     def summary_prompt(self, requirements, title=None, template_summary=None) -> list:
         return self._section_prompt(
             "summary", requirements, title=title, template=template_summary
-        )
-
-    def summary_refactor_prompt(
-        self, requirements, old_summary, title=None, template_summary=None
-    ) -> list:
-        return self._refactor_text_prompt(
-            "summary", requirements, old_summary, title=title, template=template_summary
         )
 
     def acknowledgement_prompt(
@@ -166,21 +99,6 @@ class Prompt:
         return self._section_prompt(
             "acknowledgement",
             requirements,
-            title=title,
-            template=template_acknowledgement,
-        )
-
-    def acknowledgement_refactor_prompt(
-        self,
-        requirements,
-        old_acknowledgement,
-        title=None,
-        template_acknowledgement=None,
-    ) -> list:
-        return self._refactor_text_prompt(
-            "acknowledgement",
-            requirements,
-            old_acknowledgement,
             title=title,
             template=template_acknowledgement,
         )
@@ -222,53 +140,6 @@ class Prompt:
                     {template_reference or ""}
 
                     Generate the reference list now.
-                """,
-            },
-        ]
-
-    def reference_refactor_prompt(
-        self, requirements, old_reference, title=None, template_reference=None
-    ) -> list:
-        return [
-            {
-                "role": "system",
-                "content": """
-                    You are a strict reviewer.
-
-                    Check the reference list against:
-                    1. Template structure compliance
-                    2. Requirement satisfaction
-                    3. Clarity and conciseness
-                    4. No hallucination
-
-                    If the reference list is PERFECT:
-                    -> Return it unchanged
-
-                    If NOT:
-                    -> Rewrite a corrected version
-
-                    Strict Constraints:
-                    - Output MUST be a valid JSON array
-                    - Each item MUST be a single reference string
-                    - Do NOT add explanations, markdown, or code fences
-
-                    Output ONLY the final JSON array.
-                """,
-            },
-            {
-                "role": "user",
-                "content": f"""
-                    Requirements:
-                    {requirements}
-
-                    Template:
-                    {template_reference or ""}
-
-                    Title:
-                    {title or ""}
-
-                    Original Reference List:
-                    {old_reference}
                 """,
             },
         ]

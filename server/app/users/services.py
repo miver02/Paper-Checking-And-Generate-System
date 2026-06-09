@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 # 导入本地包
 from .models import User
+from .tokens import build_user_token_pair
 from ..tools import tc
 
 
@@ -14,16 +14,14 @@ class LoginService:
         user = authenticate(phone=phone, password=password)
         if not user:
             raise ValueError("用户名或密码错误")
-        
-        # 生成JWT token
-        refresh = RefreshToken.for_user(user)
-        access = AccessToken.for_user(user)
+
+        token_pair = build_user_token_pair(user)
 
         user.last_login = tc.get_nowtime()
         user.save(update_fields=['last_login'])
         return {
-            'refresh': str(refresh),
-            'access': str(access),
+            'refresh': token_pair['refresh'],
+            'access': token_pair['access'],
             'user': user
         }
 
@@ -43,13 +41,11 @@ class RegisterService:
             last_login=tc.get_nowtime(),
             **kwargs
         )
-        
-        # 生成JWT token
-        refresh = RefreshToken.for_user(user)
-        access = AccessToken.for_user(user)
+
+        token_pair = build_user_token_pair(user)
         
         return {
-            'refresh': str(refresh),
-            'access': str(access),
+            'refresh': token_pair['refresh'],
+            'access': token_pair['access'],
             'user': user
         }

@@ -7,12 +7,14 @@ from rest_framework.parsers import (
     FormParser,
     MultiPartParser,
 )
+from django.db import transaction
 
 # 本地导入
 from .services import LoginService, RegisterService
 from .serializers import (
     UserBaseInfoRes, UserRegisterReq, UserLoginReq, UpdateUserProfileReq
 )
+from app.security.services import LogoutService
 from app.security.throttles import (
     LoginIPThrottle, RegisterThrottle, UserThrottle, ApiThrottle,
     TokenThrottle,
@@ -135,3 +137,16 @@ class UploadAvatarView(APIView):
         user.avatar = request.FILES['avatar']
         user.save(update_fields=['avatar'])
         return res_common.get_response200(data={"url": user.avatar.url})
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            with transaction.atomic():
+                LogoutService.invalidate_user_tokens(request.user)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
+
+        return res_common.get_response200(message="退出成功")

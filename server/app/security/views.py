@@ -1,6 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db import transaction
 
 # 本地导入
 from app.users.models import User
@@ -52,10 +53,13 @@ class ChangeEmailView(APIView):
         except ValueError as e:
             return Response({'code': 400, 'message': str(e)})
 
-        user.email = email
-        user.save(update_fields=['email'])
-
-        LogoutService.blacklist_user_tokens(user)
+        try:
+            with transaction.atomic():
+                user.email = email
+                user.save(update_fields=['email'])
+                LogoutService.invalidate_user_tokens(user)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
 
         return res_common.get_response200(message='邮箱修改成功')
 
@@ -87,10 +91,13 @@ class ChangePhoneView(APIView):
         except ValueError as e:
             return res_common.get_response400(err=str(e))
 
-        user.phone = phone
-        user.last_phone_change_at = tc.get_nowtime()
-        user.save(update_fields=['phone', 'last_phone_change_at'])
-
-        LogoutService.blacklist_user_tokens(user)
+        try:
+            with transaction.atomic():
+                user.phone = phone
+                user.last_phone_change_at = tc.get_nowtime()
+                user.save(update_fields=['phone', 'last_phone_change_at'])
+                LogoutService.invalidate_user_tokens(user)
+        except Exception as e:
+            return res_common.get_response400(err=str(e))
 
         return res_common.get_response200(message='手机号修改成功')

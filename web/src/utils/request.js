@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user/index'
 
 const service = axios.create({
@@ -29,6 +30,14 @@ service.interceptors.response.use(
     const userStore = useUserStore()
 
     if (error.response?.status === 401) {
+      const requestUrl = error.config?.url || ''
+      if (
+        requestUrl.includes('/user/token/refresh/') ||
+        requestUrl.includes('/user/token/verify/')
+      ) {
+        return Promise.reject(error)
+      }
+
       // 尝试刷新token
       const refreshed = await userStore.checkAndRefreshToken()
 

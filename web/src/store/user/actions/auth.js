@@ -1,5 +1,5 @@
 // src/store/user/actions/auth.js
-import { refreshToken } from '@/api/auth'
+import { refreshToken, logout as logoutRequest } from '@/api/auth'
 import { parseJwt } from '../utils'
 
 export default {
@@ -74,6 +74,18 @@ export default {
     })()
 
     return this.refreshingPromise
+  },
+
+  async checkAndRefreshToken() {
+    return this.refreshTokenAction()
+  },
+
+  async logoutAction() {
+    try {
+      await logoutRequest()
+    } finally {
+      this.clearToken()
+    }
   },
 
   clearToken() {

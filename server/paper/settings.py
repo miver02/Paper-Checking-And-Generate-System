@@ -168,7 +168,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [ 
         # 'rest_framework.authentication.TokenAuthentication',  # 使用token认证
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'app.users.authentication.TokenVersionJWTAuthentication',
         'rest_framework.authentication.SessionAuthentication', # 保留session认证
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # 自动为api响应分页
@@ -221,6 +221,8 @@ CELERY_TIMEZONE = TIME_ZONE
 AUTH_USER_MODEL = "app_users.User"
 
 # JWT设置
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY") or SECRET_KEY
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # access token有效期
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # refresh token有效期
@@ -229,7 +231,7 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': False,
     
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': JWT_SIGNING_KEY,
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,
@@ -251,6 +253,9 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'TOKEN_OBTAIN_SERIALIZER': 'app.users.serializers.VersionedTokenObtainPairSerializer',
+    'TOKEN_REFRESH_SERIALIZER': 'app.users.serializers.VersionedTokenRefreshSerializer',
+    'TOKEN_VERIFY_SERIALIZER': 'app.users.serializers.VersionedTokenVerifySerializer',
 }
 
 # 手机号更换时间限制

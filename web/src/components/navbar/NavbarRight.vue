@@ -54,12 +54,12 @@ const handleProfileClick = () => {
   userStore.toggleProfileModal(true)
 }
 // 退出登录成功处理
-const handleLogoutClick = () => {
+const handleLogoutClick = async () => {
   try {
-    userStore.clearToken()
+    await userStore.logoutAction()
     ElMessage.success('成功退出登录')
-  } catch (error) {
-    ElMessage.error('退出登录失败:', error)
+  } catch {
+    ElMessage.error('退出登录失败')
   }
 }
 </script>

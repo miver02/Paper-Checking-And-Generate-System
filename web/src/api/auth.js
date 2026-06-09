@@ -2,7 +2,7 @@ import service from '@/utils/request'
 
 export const login = data => {
   return service({
-    url: '/token/',
+    url: '/user/token/',
     method: 'post',
     data,
   })
@@ -10,7 +10,7 @@ export const login = data => {
 
 export const refreshToken = data => {
   return service({
-    url: '/token/refresh/',
+    url: '/user/token/refresh/',
     method: 'post',
     data,
   })
@@ -18,8 +18,15 @@ export const refreshToken = data => {
 
 export const verifyToken = data => {
   return service({
-    url: '/token/verify/',
+    url: '/user/token/verify/',
     method: 'post',
     data,
+  })
+}
+
+export const logout = () => {
+  return service({
+    url: '/user/logout/',
+    method: 'post',
   })
 }

@@ -5,6 +5,7 @@ from django.core.validators import MaxLengthValidator
 
 # 抽离全局常量：提升可维护性，避免硬编码
 GENERATE_STATUS_CHOICES = (
+    ("queued", "排队中"),
     ("generating", "生成中"),
     ("completed", "已完成"),
     ("failed", "生成失败"),
@@ -114,7 +115,26 @@ class GeneratedPaper(models.Model):
         choices=GENERATE_STATUS_CHOICES,
         default="generating",
         verbose_name="生成状态",
-        help_text="论文生成状态：generating-生成中，completed-已完成，failed-生成失败"
+        help_text="论文生成状态：queued-排队中，generating-生成中，completed-已完成，failed-生成失败"
+    )
+
+    # Celery 任务ID，便于排查与前端轮询
+    task_id = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+        verbose_name="任务ID",
+        help_text="Celery任务ID"
+    )
+
+    # 失败原因，便于前端展示与后续重试排查
+    failed_reason = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="失败原因",
+        help_text="任务失败时的错误信息"
     )
 
     # 优化7：时间字段补充注释，明确用途
@@ -177,6 +197,14 @@ class GeneratedPaper(models.Model):
     def is_generating(self):
         """判断是否正在生成"""
         return self.status == "generating"
+
+    def is_queued(self):
+        """判断是否已进入队列"""
+        return self.status == "queued"
+
+    def is_processing(self):
+        """判断是否处于排队或生成中"""
+        return self.status in {"queued", "generating"}
 
     def is_completed(self):
         """判断是否生成完成"""

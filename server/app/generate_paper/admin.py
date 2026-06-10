@@ -4,7 +4,7 @@ from .models import GeneratedPaper
 
 @admin.register(GeneratedPaper)
 class GeneratedPaperAdmin(admin.ModelAdmin):
-    list_display = ["title", "user", "status", "created_at"]
+    list_display = ["title", "user", "status", "task_id", "created_at"]
     list_filter = ["status", "created_at"]
     search_fields = ["title", "user__username", "requirements"]
     readonly_fields = ["created_at", "updated_at", "completed_at"]
@@ -12,7 +12,17 @@ class GeneratedPaperAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "基本信息",
-            {"fields": ("user", "title", "requirements", "template", "status")},
+            {
+                "fields": (
+                    "user",
+                    "title",
+                    "requirements",
+                    "template",
+                    "status",
+                    "task_id",
+                    "failed_reason",
+                )
+            },
         ),
         (
             "论文内容",

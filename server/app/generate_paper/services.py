@@ -1,8 +1,7 @@
 import json
 
-from django.db import transaction
-
 from .models import GeneratedPaper
+from ..tools.ai import AIServiceError
 
 
 class AIService:
@@ -45,6 +44,17 @@ class AIService:
             return ""
         return json.dumps(payload, ensure_ascii=False)
 
+    def _parse_template_text(self, template_text: str):
+        if not template_text:
+            return {}
+
+        try:
+            parsed = json.loads(template_text)
+        except json.JSONDecodeError:
+            return {}
+
+        return parsed if isinstance(parsed, dict) else {}
+
     # 创建新的paper记录
     def _create_paper_record(
         self,
@@ -53,13 +63,26 @@ class AIService:
         requirements=None,
         title=None,
         template_text=None,
+        status=None,
+        task_id=None,
+        failed_reason=None,
     ):
-        return GeneratedPaper.objects.create(
+        paper = GeneratedPaper.objects.create(
             user=user if getattr(user, "is_authenticated", False) else None,
             title=title or topic or "",
             requirements=requirements or "",
             template=template_text or "",
         )
+        updates = {}
+        if status is not None:
+            updates["status"] = status
+        if task_id is not None:
+            updates["task_id"] = task_id
+        if failed_reason is not None:
+            updates["failed_reason"] = failed_reason
+        if updates:
+            self._persist_paper(paper, **updates)
+        return paper
 
     # 更新1+个字段
     def _persist_paper(self, paper, status=None, **fields):
@@ -71,12 +94,43 @@ class AIService:
         paper.save()
         return paper
 
+    def _build_generation_result(self, paper, topic=None):
+        return {
+            "paper_id": paper.id,
+            "task_id": paper.task_id,
+            "status": paper.status,
+            "topic": topic or paper.title,
+            "title": paper.title,
+            "requirements": paper.requirements,
+            "template": paper.template,
+            "abstract": paper.abstract,
+            "key_words": paper.key_words,
+            "abstract_en": paper.abstract_en,
+            "key_words_en": paper.key_words_en,
+            "content": paper.content,
+            "summary": paper.summary,
+            "thank_words": paper.thank_words,
+            "literature": paper.literature,
+            "failed_reason": paper.failed_reason or "",
+            "created_at": paper.created_at,
+            "updated_at": paper.updated_at,
+            "completed_at": paper.completed_at,
+        }
+
+    def _mark_paper_failed(self, paper, reason, task_id=None):
+        updates = {
+            "failed_reason": reason,
+        }
+        if task_id is not None:
+            updates["task_id"] = task_id
+        self._persist_paper(paper, status="failed", **updates)
+        return paper
+
     def generate_paper(
         self,
         topic,
         requirements,
         title=None,
-        paper_id=None,
         template_abstract=None,
         template_body=None,
         template_summary=None,
@@ -84,77 +138,106 @@ class AIService:
         template_reference=None,
         user=None,
     ):
-        with transaction.atomic():
-            paper_title = title or topic
-            template_text = self._build_template_text(
-                abstract=template_abstract,
-                body=template_body,
-                summary=template_summary,
-                acknowledgement=template_acknowledgement,
-                reference=template_reference,
-            )
-            paper = self._create_paper_record(
-                user=user,
-                topic=topic,
-                requirements=requirements,
-                title=paper_title,
-                template_text=template_text,
-            )
+        paper_title = title or topic
+        template_text = self._build_template_text(
+            abstract=template_abstract,
+            body=template_body,
+            summary=template_summary,
+            acknowledgement=template_acknowledgement,
+            reference=template_reference,
+        )
+        paper = self._create_paper_record(
+            user=user,
+            topic=topic,
+            requirements=requirements,
+            title=paper_title,
+            template_text=template_text,
+            status="queued",
+        )
 
-            abstract_data = self.generate_abstract(
-                requirements,
-                title=paper_title,
-                template_abstract=template_abstract,
-                paper=paper,
-            )
-            body_data = self.generate_body(
-                requirements,
-                title=paper_title,
-                template_body=template_body,
-                paper=paper,
-            )
-            summary_data = self.generate_summary(
-                requirements,
-                title=paper_title,
-                template_summary=template_summary,
-                paper=paper,
-            )
-            acknowledgement_data = self.generate_acknowledgement(
-                requirements,
-                title=paper_title,
-                template_acknowledgement=template_acknowledgement,
-                paper=paper,
-            )
-            reference_data = self.generate_reference(
-                requirements,
-                title=paper_title,
-                template_reference=template_reference,
-                paper=paper,
-            )
+        from .tasks import generate_paper_task
 
-            self._persist_paper(
-                paper,
-                status="completed",
-                abstract=abstract_data["abstract_zh"],
-                abstract_en=abstract_data["abstract_en"],
-                content=body_data["content"],
-                summary=summary_data["summary"],
-                thank_words=acknowledgement_data["thank_words"],
-                literature=reference_data["literature"],
-            )
+        try:
+            async_result = generate_paper_task.delay(paper.id, getattr(user, "id", None))
+        except Exception as exc:
+            self._mark_paper_failed(paper, str(exc))
+            raise AIServiceError(f"任务派发失败: {exc}") from exc
 
-            return {
-                **abstract_data,
-                **body_data,
-                **summary_data,
-                **acknowledgement_data,
-                **reference_data,
-                "paper_id": paper.id,
-                "status": paper.status,
-                "topic": topic,
-                "title": paper_title,
-                "requirements": requirements,
-            }
+        self._persist_paper(paper, task_id=async_result.id)
+
+        return self._build_generation_result(paper, topic=topic)
+
+    def get_paper_status(self, paper_id, user=None):
+        paper = GeneratedPaper.objects.select_related("user").get(pk=paper_id)
+        if user is not None and paper.user_id not in (None, getattr(user, "id", None)):
+            raise PermissionError("无权访问该论文记录")
+        return self._build_generation_result(paper)
+
+    def execute_paper_generation(self, paper_id, user_id=None, task_id=None):
+        paper = GeneratedPaper.objects.select_related("user").get(pk=paper_id)
+        if user_id is not None and paper.user_id not in (None, user_id):
+            raise PermissionError("无权生成该论文记录")
+
+        if task_id is not None:
+            self._persist_paper(paper, task_id=task_id)
+
+        self._persist_paper(paper, status="generating", failed_reason="")
+
+        template_payload = self._parse_template_text(paper.template)
+        paper_title = paper.title or ""
+        requirements = paper.requirements
+
+        abstract_data = self.generate_abstract(
+            requirements,
+            title=paper_title,
+            template_abstract=template_payload.get("abstract"),
+            paper=paper,
+        )
+        body_data = self.generate_body(
+            requirements,
+            title=paper_title,
+            template_body=template_payload.get("body"),
+            paper=paper,
+        )
+        summary_data = self.generate_summary(
+            requirements,
+            title=paper_title,
+            template_summary=template_payload.get("summary"),
+            paper=paper,
+        )
+        acknowledgement_data = self.generate_acknowledgement(
+            requirements,
+            title=paper_title,
+            template_acknowledgement=template_payload.get("acknowledgement"),
+            paper=paper,
+        )
+        reference_data = self.generate_reference(
+            requirements,
+            title=paper_title,
+            template_reference=template_payload.get("reference"),
+            paper=paper,
+        )
+
+        self._persist_paper(
+            paper,
+            status="completed",
+            failed_reason="",
+            abstract=abstract_data["abstract_zh"],
+            abstract_en=abstract_data["abstract_en"],
+            content=body_data["content"],
+            summary=summary_data["summary"],
+            thank_words=acknowledgement_data["thank_words"],
+            literature=reference_data["literature"],
+        )
+
+        return {
+            **abstract_data,
+            **body_data,
+            **summary_data,
+            **acknowledgement_data,
+            **reference_data,
+            **self._build_generation_result(paper),
+        }
 
     def generate_abstract(
         self,

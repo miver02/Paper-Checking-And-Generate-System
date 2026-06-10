@@ -55,3 +55,7 @@ class UpdateUserProfileReq(serializers.ModelSerializer):
             raise serializers.ValidationError("头像大小不能超过 2MB")
 
         return file
+
+
+class LogoutReq(serializers.Serializer):
+    refresh = serializers.CharField()

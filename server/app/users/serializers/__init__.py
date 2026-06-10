@@ -1,4 +1,4 @@
-from .request import UserRegisterReq, UserLoginReq, UpdateUserProfileReq
+from .request import UserRegisterReq, UserLoginReq, UpdateUserProfileReq, LogoutReq
 from .response import UserBaseInfoRes
 from .token import (
     VersionedTokenObtainPairSerializer,
@@ -18,4 +18,5 @@ __all__ = [
     "UserRegisterReq",
     "UserLoginReq",
     "UpdateUserProfileReq",
+    "LogoutReq",
 ]

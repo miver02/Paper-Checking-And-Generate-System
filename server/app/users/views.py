@@ -12,7 +12,7 @@ from django.db import transaction
 # 本地导入
 from .services import LoginService, RegisterService
 from .serializers import (
-    UserBaseInfoRes, UserRegisterReq, UserLoginReq, UpdateUserProfileReq
+    UserBaseInfoRes, UserRegisterReq, UserLoginReq, UpdateUserProfileReq, LogoutReq
 )
 from app.security.services import LogoutService
 from app.security.throttles import (
@@ -143,10 +143,19 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        serializer = LogoutReq(data=request.data)
+        if not serializer.is_valid():
+            err = serializer.errors
+            if "refresh" in err:
+                return res_common.get_response400(err=err["refresh"][0])
+            return res_common.get_response400(str(err))
+
         try:
-            with transaction.atomic():
-                LogoutService.invalidate_user_tokens(request.user)
+            LogoutService.revoke_refresh_token(
+                serializer.validated_data["refresh"],
+                request.user,
+            )
         except Exception as e:
             return res_common.get_response400(err=str(e))
 
-        return res_common.get_response200(message="退出成功")
+        return res_common.get_response200(message="当前设备已退出")

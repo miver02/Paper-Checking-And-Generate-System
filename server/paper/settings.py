@@ -224,7 +224,7 @@ AUTH_USER_MODEL = "app_users.User"
 JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY") or SECRET_KEY
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # access token有效期
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # access token有效期
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # refresh token有效期
     'ROTATE_REFRESH_TOKENS': True,                  # 是否轮换刷新token
     'BLACKLIST_AFTER_ROTATION': True,               # 刷新后将旧token加入黑名单

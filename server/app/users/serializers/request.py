@@ -7,8 +7,9 @@ from ..models import User, PHONE_REGEX
 
 # 登录请求
 class UserLoginReq(serializers.ModelSerializer):
-    phone = serializers.CharField(max_length=11, validators=[
-                                  RegexValidator(PHONE_REGEX)])
+    phone = serializers.CharField(
+        max_length=11, validators=[RegexValidator(PHONE_REGEX)]
+    )
 
     class Meta:
         model = User

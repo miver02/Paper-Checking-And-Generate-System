@@ -1,4 +1,5 @@
 import json
+import re
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -145,9 +146,9 @@ class GeneratePaperApiTestCase(APITestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-    @patch("app.generate_paper.tasks.generate_paper_task.delay")
-    def test_generate_paper_api_returns_paper_id(self, mock_delay):
-        mock_delay.return_value.id = "task-123"
+    @patch("app.generate_paper.tasks.generate_paper_task.apply_async")
+    def test_generate_paper_api_returns_paper_id(self, mock_apply_async):
+        mock_apply_async.return_value.id = "gp-" + "a" * 48
         response = self.client.post(
             "/paper/generate/all/",
             {
@@ -167,12 +168,14 @@ class GeneratePaperApiTestCase(APITestCase):
         self.assertEqual(response.data["code"], 200)
         self.assertIn("paper_id", response.data["data"])
         self.assertEqual(response.data["data"]["status"], "queued")
-        self.assertEqual(response.data["data"]["task_id"], "task-123")
+        self.assertTrue(
+            re.fullmatch(r"gp-[A-Za-z0-9]{48}", response.data["data"]["task_id"])
+        )
         self.assertEqual(GeneratedPaper.objects.count(), 1)
 
         new_paper = GeneratedPaper.objects.get(pk=response.data["data"]["paper_id"])
         self.assertEqual(new_paper.status, "queued")
-        self.assertEqual(new_paper.task_id, "task-123")
+        self.assertTrue(re.fullmatch(r"gp-[A-Za-z0-9]{48}", new_paper.task_id))
         self.assertEqual(new_paper.title, "人工智能论文")
 
     def test_generate_paper_status_api_returns_paper_status(self):

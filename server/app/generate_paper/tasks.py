@@ -20,18 +20,18 @@ def generate_paper_task(self, paper_id, user_id=None):
     except AIServiceError as exc:
         paper = GeneratedPaper.objects.filter(pk=paper_id).first()
         if paper is not None:
-            service._persist_paper(
-                paper,
-                status="generating",
-                task_id=task_id,
-                failed_reason=str(exc),
-            )
+            if self.request.retries < self.max_retries:
+                service._persist_paper(
+                    paper,
+                    status="generating",
+                    task_id=task_id,
+                    failed_reason=str(exc),
+                )
+            else:
+                service._mark_paper_failed(paper, str(exc), task_id=task_id)
 
         if self.request.retries < self.max_retries:
             raise self.retry(exc=exc)
-
-        if paper is not None:
-            service._mark_paper_failed(paper, str(exc), task_id=task_id)
         raise
     except PermissionError as exc:
         paper = GeneratedPaper.objects.filter(pk=paper_id).first()

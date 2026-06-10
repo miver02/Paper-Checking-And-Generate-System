@@ -1,10 +1,15 @@
 import json
+import secrets
+import string
 
 from .models import GeneratedPaper
 from ..tools.ai import AIServiceError
 
 
 class AIService:
+    TASK_ID_PREFIX = "gp-"
+    TASK_ID_LENGTH = 48
+
     def __init__(self):
         from ..tools import AIToolClass, ai_prompt
 
@@ -54,6 +59,17 @@ class AIService:
             return {}
 
         return parsed if isinstance(parsed, dict) else {}
+
+    def _generate_task_id(self):
+        alphabet = string.ascii_letters + string.digits
+        token = "".join(secrets.choice(alphabet) for _ in range(self.TASK_ID_LENGTH))
+        return f"{self.TASK_ID_PREFIX}{token}"
+
+    def _reserve_task_id(self):
+        while True:
+            task_id = self._generate_task_id()
+            if not GeneratedPaper.objects.filter(task_id=task_id).exists():
+                return task_id
 
     # 创建新的paper记录
     def _create_paper_record(
@@ -139,6 +155,7 @@ class AIService:
         user=None,
     ):
         paper_title = title or topic
+        task_id = self._reserve_task_id()
         template_text = self._build_template_text(
             abstract=template_abstract,
             body=template_body,
@@ -153,17 +170,19 @@ class AIService:
             title=paper_title,
             template_text=template_text,
             status="queued",
+            task_id=task_id,
         )
 
         from .tasks import generate_paper_task
 
         try:
-            async_result = generate_paper_task.delay(paper.id, getattr(user, "id", None))
+            generate_paper_task.apply_async(
+                args=(paper.id, getattr(user, "id", None)),
+                task_id=task_id,
+            )
         except Exception as exc:
             self._mark_paper_failed(paper, str(exc))
             raise AIServiceError(f"任务派发失败: {exc}") from exc
-
-        self._persist_paper(paper, task_id=async_result.id)
 
         return self._build_generation_result(paper, topic=topic)
 

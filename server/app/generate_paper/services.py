@@ -75,7 +75,6 @@ class AIService:
     def _create_paper_record(
         self,
         user=None,
-        topic=None,
         requirements=None,
         title=None,
         template_text=None,
@@ -85,7 +84,7 @@ class AIService:
     ):
         paper = GeneratedPaper.objects.create(
             user=user if getattr(user, "is_authenticated", False) else None,
-            title=title or topic or "",
+            title=title or "",
             requirements=requirements or "",
             template=template_text or "",
         )
@@ -110,12 +109,11 @@ class AIService:
         paper.save()
         return paper
 
-    def _build_generation_result(self, paper, topic=None):
+    def _build_generation_result(self, paper):
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "task_id": paper.task_id,
             "status": paper.status,
-            "topic": topic or paper.title,
             "title": paper.title,
             "requirements": paper.requirements,
             "template": paper.template,
@@ -144,7 +142,6 @@ class AIService:
 
     def generate_paper(
         self,
-        topic,
         requirements,
         title=None,
         template_abstract=None,
@@ -154,7 +151,7 @@ class AIService:
         template_reference=None,
         user=None,
     ):
-        paper_title = title or topic
+        paper_title = title or ""
         task_id = self._reserve_task_id()
         template_text = self._build_template_text(
             abstract=template_abstract,
@@ -165,7 +162,6 @@ class AIService:
         )
         paper = self._create_paper_record(
             user=user,
-            topic=topic,
             requirements=requirements,
             title=paper_title,
             template_text=template_text,
@@ -184,7 +180,7 @@ class AIService:
             self._mark_paper_failed(paper, str(exc))
             raise AIServiceError(f"任务派发失败: {exc}") from exc
 
-        return self._build_generation_result(paper, topic=topic)
+        return self._build_generation_result(paper)
 
     def get_paper_status(self, paper_id, user=None):
         paper = GeneratedPaper.objects.select_related("user").get(pk=paper_id)
@@ -263,7 +259,6 @@ class AIService:
         requirements,
         title=None,
         template_abstract=None,
-        paper_id=None,
         user=None,
         paper=None,
     ):
@@ -291,7 +286,7 @@ class AIService:
         )
 
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "status": paper.status,
             "abstract_zh": zh_abstract,
             "abstract_en": en_abstract,
@@ -302,7 +297,6 @@ class AIService:
         requirements,
         title=None,
         template_body=None,
-        paper_id=None,
         user=None,
         paper=None,
     ):
@@ -327,7 +321,7 @@ class AIService:
         )
 
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "status": paper.status,
             "content": content,
         }
@@ -337,7 +331,6 @@ class AIService:
         requirements,
         title=None,
         template_summary=None,
-        paper_id=None,
         user=None,
         paper=None,
     ):
@@ -362,7 +355,7 @@ class AIService:
         )
 
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "status": paper.status,
             "summary": summary,
         }
@@ -372,7 +365,6 @@ class AIService:
         requirements,
         title=None,
         template_acknowledgement=None,
-        paper_id=None,
         user=None,
         paper=None,
     ):
@@ -401,7 +393,7 @@ class AIService:
         )
 
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "status": paper.status,
             "thank_words": thank_words,
         }
@@ -411,7 +403,6 @@ class AIService:
         requirements,
         title=None,
         template_reference=None,
-        paper_id=None,
         user=None,
         paper=None,
     ):
@@ -437,7 +428,7 @@ class AIService:
         )
 
         return {
-            "paper_id": paper.id,
+            "id": paper.id,
             "status": paper.status,
             "literature": literature,
         }

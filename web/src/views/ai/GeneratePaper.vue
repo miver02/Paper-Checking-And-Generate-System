@@ -33,7 +33,7 @@
               <div class="card-header">
                 <div>
                   <div class="card-title">生成配置</div>
-                  <div class="card-subtitle">填写主题、要求和可选模板后开始生成</div>
+                  <div class="card-subtitle">填写标题、要求和可选模板后开始生成</div>
                 </div>
 
                 <el-button text type="primary" @click="fillExample">
@@ -49,31 +49,15 @@
               label-position="top"
               class="paper-form"
             >
-              <el-row :gutter="16">
-                <el-col :xs="24" :md="12">
-                  <el-form-item label="论文主题" prop="topic">
-                    <el-input
-                      v-model="form.topic"
-                      placeholder="例如：人工智能在教育中的应用"
-                      maxlength="80"
-                      show-word-limit
-                      clearable
-                    />
-                  </el-form-item>
-                </el-col>
-
-                <el-col :xs="24" :md="12">
-                  <el-form-item label="论文标题">
-                    <el-input
-                      v-model="form.title"
-                      placeholder="留空时默认使用论文主题"
-                      maxlength="100"
-                      show-word-limit
-                      clearable
-                    />
-                  </el-form-item>
-                </el-col>
-              </el-row>
+              <el-form-item label="论文标题">
+                <el-input
+                  v-model="form.title"
+                  placeholder="留空时使用默认标题"
+                  maxlength="100"
+                  show-word-limit
+                  clearable
+                />
+              </el-form-item>
 
               <el-form-item label="生成要求" prop="requirements">
                 <el-input
@@ -231,7 +215,7 @@
 
               <div class="meta-list">
                 <div class="meta-item">
-                  <span>paper_id</span>
+                  <span>id</span>
                   <strong>{{ activePaperId || '-' }}</strong>
                 </div>
                 <div class="meta-item">
@@ -345,7 +329,6 @@ const activeTab = ref('abstract')
 const storageKey = 'generated-paper:last-paper-id'
 
 const form = reactive({
-  topic: '',
   title: '',
   requirements: '',
   templateAbstract: '',
@@ -356,7 +339,6 @@ const form = reactive({
 })
 
 const rules = {
-  topic: [{ required: true, message: '请输入论文主题', trigger: 'blur' }],
   requirements: [
     { required: true, message: '请输入生成要求', trigger: 'blur' },
   ],
@@ -471,7 +453,6 @@ const syncTaskFromStorage = async () => {
 
 const fillExample = () => {
   Object.assign(form, {
-    topic: '人工智能在教育场景中的应用研究',
     title: '人工智能在教育场景中的应用研究',
     requirements:
       '请生成一篇结构完整的论文，包含摘要、正文、总结、致谢和参考文献。字数不少于6000字，语言正式，适合本科毕业论文。',
@@ -486,7 +467,6 @@ const fillExample = () => {
 const resetForm = () => {
   formRef.value?.resetFields?.()
   Object.assign(form, {
-    topic: '',
     title: '',
     requirements: '',
     templateAbstract: '',
@@ -520,7 +500,6 @@ const submitGeneration = async () => {
 
   try {
     const response = await generatePaper({
-      topic: form.topic,
       title: form.title,
       requirements: form.requirements,
       template_abstract: form.templateAbstract,
@@ -536,7 +515,7 @@ const submitGeneration = async () => {
     }
 
     const nextTask = payload.data || {}
-    activePaperId.value = String(nextTask.paper_id || '')
+    activePaperId.value = String(nextTask.id || '')
     localStorage.setItem(storageKey, activePaperId.value)
     task.value = nextTask
     activeTab.value = 'abstract'

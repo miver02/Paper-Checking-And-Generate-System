@@ -38,7 +38,6 @@ class AIServiceTestCase(TestCase):
             requirements="围绕人工智能生成论文摘要",
             title="人工智能研究",
             template_abstract="模板摘要",
-            paper_id=old_paper.id,
             user=self.user,
         )
 
@@ -147,12 +146,11 @@ class GeneratePaperApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     @patch("app.generate_paper.tasks.generate_paper_task.apply_async")
-    def test_generate_paper_api_returns_paper_id(self, mock_apply_async):
+    def test_generate_paper_api_returns_id(self, mock_apply_async):
         mock_apply_async.return_value.id = "gp-" + "a" * 48
         response = self.client.post(
             "/paper/generate/all/",
             {
-                "topic": "人工智能",
                 "requirements": "写一篇人工智能论文",
                 "title": "人工智能论文",
                 "template_abstract": "摘要模板",
@@ -166,14 +164,15 @@ class GeneratePaperApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["code"], 200)
-        self.assertIn("paper_id", response.data["data"])
+        self.assertIn("id", response.data["data"])
+        self.assertNotIn("topic", response.data["data"])
         self.assertEqual(response.data["data"]["status"], "queued")
         self.assertTrue(
             re.fullmatch(r"gp-[A-Za-z0-9]{48}", response.data["data"]["task_id"])
         )
         self.assertEqual(GeneratedPaper.objects.count(), 1)
 
-        new_paper = GeneratedPaper.objects.get(pk=response.data["data"]["paper_id"])
+        new_paper = GeneratedPaper.objects.get(pk=response.data["data"]["id"])
         self.assertEqual(new_paper.status, "queued")
         self.assertTrue(re.fullmatch(r"gp-[A-Za-z0-9]{48}", new_paper.task_id))
         self.assertEqual(new_paper.title, "人工智能论文")
@@ -190,5 +189,5 @@ class GeneratePaperApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["code"], 200)
-        self.assertEqual(response.data["data"]["paper_id"], paper.id)
+        self.assertEqual(response.data["data"]["id"], paper.id)
         self.assertEqual(response.data["data"]["status"], "queued")

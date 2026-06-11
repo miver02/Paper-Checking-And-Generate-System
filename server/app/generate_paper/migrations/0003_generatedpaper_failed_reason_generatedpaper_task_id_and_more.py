@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                     ("completed", "已完成"),
                     ("failed", "生成失败"),
                 ],
-                default="generating",
+                default="queued",
                 help_text="论文生成状态：queued-排队中，generating-生成中，completed-已完成，failed-生成失败",
                 max_length=20,
                 verbose_name="生成状态",

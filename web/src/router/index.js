@@ -19,6 +19,16 @@ const routes = [
     name: 'profile',
     component: () => import('@/views/profile/Profile.vue'),
   },
+  {
+    path: '/ai/generate',
+    name: 'ai-generate',
+    component: () => import('@/views/ai/GeneratePaper.vue'),
+  },
+  {
+    path: '/ai/check',
+    name: 'ai-check',
+    component: () => import('@/views/ai/CheckPaper.vue'),
+  },
 ]
 
 const router = createRouter({

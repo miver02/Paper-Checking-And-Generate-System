@@ -44,7 +44,7 @@ const features = [
     iconColor: '#409eff',
     buttonType: 'primary',
     buttonText: '生成论文',
-    path: '/genetate',
+    path: '/ai/generate',
     plain: false,
   },
   {
@@ -54,7 +54,7 @@ const features = [
     iconColor: '#67c23a',
     buttonType: 'success',
     buttonText: '开始检测',
-    path: '/chech',
+    path: '/ai/check',
     plain: false,
   },
   {
@@ -65,7 +65,7 @@ const features = [
     buttonText: '进入中心',
     buttonType: 'primary',
     plain: true,
-    path: '/dashboard',
+    path: '/user/profile',
   },
 ]
 </script>

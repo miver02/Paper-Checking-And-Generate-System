@@ -5,6 +5,7 @@
     border-none
     class="navbar-menu"
     mode="horizontal"
+    :default-active="route.path"
     :ellipsis="false"
     background-color="#409eff"
     text-color="#fff"
@@ -12,7 +13,7 @@
   >
     <!-- 左侧 -->
     <div flex items-center flex-1 class="navbar-left">
-      <el-menu-item index="/">
+      <el-menu-item index="/" @click="handleNavigate('/')">
         <el-icon><Reading /></el-icon>
         <span>论文系统</span>
       </el-menu-item>
@@ -24,6 +25,7 @@
         v-for="item in menuList"
         :key="item.index"
         :index="item.index"
+        @click="handleNavigate(item.index)"
       >
         <el-icon>
           <component :is="item.icon" />
@@ -38,9 +40,13 @@
 </template>
 
 <script setup>
+import { useRoute, useRouter } from 'vue-router'
 import { Reading, Odometer, EditPen, Search } from '@element-plus/icons-vue'
 
 import NavbarRight from './NavbarRight.vue'
+
+const router = useRouter()
+const route = useRoute()
 
 /* 中间菜单配置 */
 const menuList = [
@@ -48,4 +54,8 @@ const menuList = [
   { index: '/ai/generate', label: '生成论文', icon: EditPen },
   { index: '/ai/check', label: '查重检测', icon: Search },
 ]
+
+const handleNavigate = path => {
+  router.push(path)
+}
 </script>

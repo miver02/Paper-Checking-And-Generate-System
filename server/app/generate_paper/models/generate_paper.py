@@ -113,7 +113,7 @@ class GeneratedPaper(models.Model):
     status = models.CharField(
         max_length=20,
         choices=GENERATE_STATUS_CHOICES,
-        default="generating",
+        default="queued",
         verbose_name="生成状态",
         help_text="论文生成状态：queued-排队中，generating-生成中，completed-已完成，failed-生成失败"
     )
